@@ -561,7 +561,7 @@
                 prompt: true,
                 placeholder: "Ketik HAPUS di sini...",
                 showCancel: true,
-                confirmText: "EKSEKUSI",
+                confirmText: "KONFIRMASI",
                 color: "var(--danger)"
             });
 
@@ -967,7 +967,7 @@
             lucide.createIcons();
         }
 
-        window.onload = () => { 
+        window.onload = async () => { 
             lucide.createIcons();
             
             // Cek Tema Tersimpan
@@ -977,9 +977,30 @@
                 updateThemeUI(true);
             }
 
-            const s = localStorage.getItem('admin_auth'); 
             fetchWelcomeStats(); 
-            if(s) { document.getElementById('welcome-screen').style.display = 'none'; masukKeDashboard(JSON.parse(s).info); }
+            
+            // CEK KEAMANAN SESI (VALIDASI ULANG KE EXCEL)
+            const s = localStorage.getItem('admin_auth'); 
+            if(s) { 
+                const authData = JSON.parse(s);
+                document.getElementById('loading-overlay').style.display = 'flex';
+                
+                try {
+                    const data = await requestData(`action=loginAdminMulti&email=${encodeURIComponent(authData.email)}&pass=${encodeURIComponent(authData.pass)}`);
+                    document.getElementById('loading-overlay').style.display = 'none';
+                    
+                    if(data.status === "success") {
+                        document.getElementById('welcome-screen').style.display = 'none'; 
+                        masukKeDashboard(data.admin); 
+                    } else {
+                        throw new Error("Akun Ditolak");
+                    }
+                } catch(e) {
+                    document.getElementById('loading-overlay').style.display = 'none';
+                    localStorage.removeItem('admin_auth');
+                    showSysDialog({title:"AKSES DITOLAK", msg:"Data admin kamu tidak ditemukan di Excel atau sudah dihapus. Silakan login ulang.", type:"error", color:"var(--danger)"});
+                }
+            }
         };
     </script>
 </body>
