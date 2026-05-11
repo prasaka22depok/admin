@@ -4,145 +4,187 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PRASAKA MASTER | ADMIN DASHBOARD</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
-            --bg: #020617; --glass: rgba(255, 255, 255, 0.03); --border: rgba(255, 255, 255, 0.1); --text: #f8fafc;
-            --blue-grad: linear-gradient(135deg, #3b82f6, #1d4ed8); --green-grad: linear-gradient(135deg, #10b981, #059669);
-            --red-grad: linear-gradient(135deg, #ef4444, #b91c1c); --orange-grad: linear-gradient(135deg, #f59e0b, #b45309);
-            --purple-grad: linear-gradient(135deg, #8b5cf6, #4338ca); --cyan-grad: linear-gradient(135deg, #0ea5e9, #0284c7);
-            --primary: #38bdf8; --danger: #fb7185; --success: #4ade80;
+            /* TEMA PUTIH BIRU */
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --primary-grad: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.1);
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
         }
+
+        body.dark-theme {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --border: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary-light: rgba(37, 99, 235, 0.15);
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background-color: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; } 
+        body { background-color: var(--bg); color: var(--text-main); min-height: 100vh; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
 
-        #auth-screen { position: fixed; inset: 0; background: radial-gradient(circle at top right, #1e293b, #020617); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
-        .auth-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 40px; padding: 45px 30px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); animation: slideUp 0.6s ease; }
-        .auth-title { font-size: 20px; font-weight: 900; margin-bottom: 25px; color: white; text-transform: uppercase; letter-spacing: 2px; }
-        .auth-input, .auth-select { width: 100%; padding: 16px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 18px; color: white; margin-bottom: 12px; outline: none; font-weight: 600; text-align: center; font-size: 13px; }
-        .auth-btn { width: 100%; padding: 18px; background: var(--blue-grad); border-radius: 18px; font-weight: 900; color: white; border: none; cursor: pointer; text-transform: uppercase; margin-bottom: 10px; transition: 0.2s; }
-        .auth-btn:active { transform: scale(0.95); }
-        .auth-switch { font-size: 10px; color: #94a3b8; margin-top: 15px; cursor: pointer; font-weight: 800; text-decoration: underline; background: none; border: none; text-transform: uppercase; }
-
-        #main-admin-content { display: none; } 
-        #overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); z-index: 99; display: none; }
-        #sidebar { position: fixed; top: 0; left: 0; height: 100%; width: 280px; background: #0a0f1e; border-right: 1px solid var(--border); z-index: 100; transform: translateX(-100%); transition: 0.4s; padding: 30px 20px; display: flex; flex-direction: column; }
-        #sidebar.open { transform: translateX(0); }
-        .sb-nav { display: flex; flex-direction: column; gap: 12px; margin-top: 30px; }
-        .sb-link { display: flex; align-items: center; gap: 15px; padding: 18px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: white; cursor: pointer; border: none; transition: 0.2s; text-decoration: none; }
+        /* AUTH & WELCOME SCREENS */
+        #welcome-screen, #auth-screen { position: fixed; inset: 0; background: var(--bg); z-index: 3000; display: flex; flex-direction: column; padding: 30px 25px; overflow-y: auto; transition: opacity 0.5s ease; }
+        #auth-screen { align-items: center; justify-content: center; z-index: 2000; }
         
-        .btn-dash { background: var(--blue-grad); } .btn-qr { background: var(--cyan-grad); } .btn-prof { background: var(--orange-grad); } .btn-log { background: var(--purple-grad); } .btn-sis { background: var(--green-grad); } .btn-set { background: rgba(255,255,255,0.05); border: 1px solid var(--border); }
-        .btn-logout { background: var(--red-grad); margin-top: auto; }
+        .ws-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 50px; }
+        .ws-brand { font-size: 14px; font-weight: 900; color: var(--text-main); display: flex; align-items: center; gap: 8px; letter-spacing: 1px; }
+        .ws-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--primary-light); border: 1px solid #dbeafe; color: var(--primary); padding: 8px 16px; border-radius: 20px; font-size: 11px; font-weight: 800; letter-spacing: 1px; margin-bottom: 20px; text-transform: uppercase; }
+        .ws-title { font-size: 42px; font-weight: 900; line-height: 1.1; margin-bottom: 10px; color: var(--text-main); letter-spacing: -1px; }
+        .ws-title span { background: var(--primary-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .ws-subtitle { font-size: 22px; font-weight: 800; color: var(--text-muted); margin-bottom: 25px; }
+        .ws-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 40px; max-width: 90%; font-weight: 600; }
+        
+        .ws-stats-container { display: flex; gap: 15px; margin-top: auto; }
+        .ws-stat-card { flex: 1; background: var(--surface); border: 1px solid var(--border); padding: 20px; border-radius: 24px; box-shadow: var(--card-shadow); display: flex; flex-direction: column; justify-content: space-between;}
+        .ws-stat-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .ws-stat-title { font-size: 11px; color: var(--text-muted); font-weight: 800; text-transform: uppercase; }
+        .ws-stat-val { font-size: 28px; font-weight: 900; color: var(--text-main); }
 
-        header { padding: 20px; display: flex; justify-content: space-between; align-items: center; max-width: 600px; margin: 0 auto; }
-        .btn-menu { background: var(--glass); border: 1px solid var(--border); padding: 12px; border-radius: 16px; color: white; cursor: pointer;}
+        .auth-card { background: var(--surface); border: 1px solid var(--border); border-radius: 30px; padding: 40px 30px; width: 100%; max-width: 380px; text-align: center; box-shadow: var(--shadow); animation: slideUp 0.5s ease; }
+        .auth-title { font-size: 22px; font-weight: 900; margin-bottom: 25px; color: var(--text-main); letter-spacing: 1px; }
+        .auth-input, .auth-select { width: 100%; padding: 16px; background: var(--bg); border: 2px solid var(--border); border-radius: 16px; color: var(--text-main); margin-bottom: 15px; outline: none; font-weight: 700; text-align: center; font-size: 14px; transition: 0.3s; }
+        .auth-input:focus, .auth-select:focus { border-color: var(--primary); background: var(--surface); box-shadow: 0 0 0 4px var(--primary-light); }
+        .auth-btn { width: 100%; padding: 18px; background: var(--primary-grad); border-radius: 16px; font-weight: 900; color: white; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: 0.2s; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25); }
+        .auth-btn:active { transform: scale(0.97); }
+        .auth-switch { font-size: 11px; color: var(--text-muted); margin-top: 15px; cursor: pointer; font-weight: 800; text-decoration: underline; background: none; border: none; text-transform: uppercase; transition: 0.2s; }
+        .auth-switch:hover { color: var(--primary); }
+
+        /* MAIN APP & SIDEBAR */
+        #main-admin-content { display: none; } 
+        #overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); z-index: 99; display: none; }
+        #sidebar { position: fixed; top: 0; left: 0; height: 100%; width: 280px; background: var(--surface); border-right: 1px solid var(--border); z-index: 100; transform: translateX(-100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 30px 20px; display: flex; flex-direction: column; box-shadow: 20px 0 40px rgba(0,0,0,0.03); }
+        #sidebar.open { transform: translateX(0); }
+        
+        .sb-user { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+        .avatar-circle { width: 45px; height: 45px; background: var(--primary-grad); border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0; font-size: 18px; font-weight: 900; color: white; }
+        
+        .sb-nav { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+        .sb-link { display: flex; align-items: center; gap: 15px; padding: 16px; border-radius: 16px; font-size: 12px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); cursor: pointer; border: none; background: transparent; transition: 0.2s; text-decoration: none; }
+        .sb-link:hover, .sb-link.active-menu { background: var(--primary-light); color: var(--primary); }
+        .sb-link.active-menu i { color: var(--primary); }
+        
+        .btn-logout { background: #fef2f2; color: var(--danger); margin-top: auto; }
+        .btn-logout:hover { background: #fee2e2; color: var(--danger); }
+
+        header { padding: 20px; display: flex; justify-content: space-between; align-items: center; max-width: 600px; margin: 0 auto; background: var(--bg); position: sticky; top: 0; z-index: 50; }
+        .btn-menu { background: var(--surface); border: 1px solid var(--border); padding: 12px; border-radius: 14px; color: var(--text-main); cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: 0.2s;}
+        .btn-menu:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary-light); }
+
         main { max-width: 600px; margin: 0 auto; padding: 0 20px 50px; }
-        .page { display: none; } .page.active { display: block; animation: slideUp 0.4s ease; }
+        .page { display: none; animation: slideUp 0.4s ease; } .page.active { display: block; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-        .card-stat { padding: 20px 15px; border-radius: 25px; text-align: center; color: white; display:flex; flex-direction:column; justify-content:center; align-items:center; border: 1px solid rgba(255,255,255,0.1); }
-        .card-stat h3 { font-size: 32px; font-weight: 900; line-height: 1; margin-top: 8px; text-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        /* CARDS & STATS */
+        .card-box { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 25px; margin-bottom: 20px; box-shadow: var(--card-shadow); }
         
-        .glass-box { background: var(--glass); border: 1px solid var(--border); border-radius: 30px; padding: 25px; margin-bottom: 15px; }
-        .data-row { display: flex; justify-content: space-between; align-items: center; padding: 18px; border-radius: 15px; background: rgba(255,255,255,0.03); margin-bottom: 10px; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .card-stat { padding: 20px 15px; border-radius: 20px; text-align: center; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--card-shadow); display:flex; flex-direction:column; justify-content:center; align-items:center; }
+        .card-stat h3 { font-size: 32px; font-weight: 900; line-height: 1; margin-top: 8px; }
+        .card-stat p { font-size: 10px; font-weight: 800; letter-spacing: 1px; }
+
+        .data-row { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--card-shadow); margin-bottom: 12px; }
         
-        #sys-dialog { position: fixed; inset: 0; z-index: 9999; display: none; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); }
-        .glass-card-popup { background: rgba(30, 41, 59, 0.8); border: 1px solid var(--border); border-radius: 35px; padding: 40px; width: 90%; max-width: 340px; text-align: center; transform: scale(0.8); transition: 0.3s; }
-        #sys-dialog.active .glass-card-popup { transform: scale(1); }
+        .status-tag { font-size: 9px; font-weight: 900; padding: 6px 12px; border-radius: 8px; text-transform: uppercase; display: inline-block; }
+        .status-active { background: #ecfdf5; color: var(--success); border: 1px solid #a7f3d0; }
+        .status-pending { background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; }
 
-        .status-tag { font-size: 9px; font-weight: 900; padding: 6px 10px; border-radius: 8px; text-transform: uppercase; display: inline-block; }
-        .status-active { background: rgba(74, 222, 128, 0.15); color: var(--success); border: 1px solid rgba(74, 222, 128, 0.3); }
-        .status-pending { background: rgba(251, 113, 133, 0.15); color: var(--danger); border: 1px solid rgba(251, 113, 133, 0.3); }
-
-        .avatar-circle { width: 90px; height: 90px; background: var(--orange-grad); border-radius: 25px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; font-weight: 900; color: white; }
-        .hidden { display: none !important; }
-
-        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.1); } 100% { opacity: 1; transform: scale(1); } }
-        .indicator { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 8px; animation: pulse 1.5s infinite; }
-        .ind-on { background: var(--success); box-shadow: 0 0 10px var(--success); }
-        .ind-off { background: var(--danger); box-shadow: 0 0 10px var(--danger); }
-        
         /* PROGRESS BAR */
-        .progress-bg { background: rgba(0,0,0,0.5); border-radius: 10px; height: 8px; width: 100%; overflow: hidden; margin-top: 15px; border: 1px solid rgba(255,255,255,0.05); }
-        .progress-fill { background: var(--green-grad); height: 100%; width: 0%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 10px; }
+        .progress-bg { background: var(--bg); border-radius: 10px; height: 10px; width: 100%; overflow: hidden; margin-top: 15px; border: 1px solid var(--border); }
+        .progress-fill { background: var(--primary-grad); height: 100%; width: 0%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 10px; }
 
-        /* WELCOME SCREEN STYLES */
-        #welcome-screen { position: fixed; inset: 0; background: radial-gradient(circle at top right, #0f172a, #020617); z-index: 3000; display: flex; flex-direction: column; padding: 30px 25px; overflow-y: auto; transition: opacity 0.5s ease; }
-        .ws-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 50px; }
-        .ws-brand { font-size: 12px; font-weight: 900; color: white; display: flex; align-items: center; gap: 8px; letter-spacing: 1px; }
-        .ws-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.2); color: var(--primary); padding: 8px 16px; border-radius: 20px; font-size: 10px; font-weight: 800; letter-spacing: 1px; margin-bottom: 20px; text-transform: uppercase; }
-        .ws-title { font-size: 42px; font-weight: 900; line-height: 1.1; margin-bottom: 10px; color: white; letter-spacing: -1px; }
-        .ws-title span { background: var(--cyan-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .ws-subtitle { font-size: 22px; font-weight: 800; color: #94a3b8; margin-bottom: 25px; }
-        .ws-desc { font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-bottom: 40px; max-width: 90%; font-weight: 500; }
-        .ws-btn-group { display: flex; gap: 15px; margin-bottom: 50px; }
-        .ws-btn-primary { background: var(--cyan-grad); border: none; padding: 16px 25px; border-radius: 16px; color: white; font-weight: 900; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; font-size: 12px; }
-        .ws-btn-primary:active { transform: scale(0.95); }
-        .ws-btn-secondary { background: transparent; border: 1px solid rgba(255,255,255,0.2); padding: 16px 25px; border-radius: 16px; color: white; font-weight: 800; cursor: pointer; font-size: 12px; }
-        .ws-stats-container { display: flex; gap: 15px; margin-top: auto; }
-        .ws-stat-card { flex: 1; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 24px; backdrop-filter: blur(10px); display: flex; flex-direction: column; justify-content: space-between;}
-        .ws-stat-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .ws-stat-title { font-size: 10px; color: #94a3b8; font-weight: 800; text-transform: uppercase; }
-        .ws-stat-val { font-size: 28px; font-weight: 900; color: white; }
+        /* DIALOG & LOADER */
+        #loading-overlay { position: fixed; inset: 0; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(5px); z-index: 99999; display: none; flex-direction: column; justify-content: center; align-items: center; color: var(--text-main); }
+        .spinner { width: 50px; height: 50px; border: 5px solid var(--primary-light); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        #sys-dialog { position: fixed; inset: 0; z-index: 9999; display: none; align-items: center; justify-content: center; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(5px); }
+        .dialog-card { background: var(--surface); border: 1px solid var(--border); border-radius: 30px; padding: 35px 25px; width: 90%; max-width: 320px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.15); transform: scale(0.9); transition: 0.3s; }
+        #sys-dialog.active .dialog-card { transform: scale(1); }
+
+        .hidden { display: none !important; }
+        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.1); } 100% { opacity: 1; transform: scale(1); } }
+        .indicator { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 10px; animation: pulse 1.5s infinite; }
+        .ind-on { background: var(--success); box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
+        .ind-off { background: var(--danger); box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
+
+        /* SETTINGS TAB */
+        .set-tab { flex: 1; padding: 15px 10px; background: none; border: none; color: var(--text-muted); font-size: 11px; font-weight: 800; border-bottom: 2px solid transparent; transition: 0.3s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .set-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 900; background: var(--primary-light); }
     </style>
 </head>
 <body>
 
     <div id="welcome-screen">
         <div class="ws-header">
-            <div class="ws-brand"><i data-lucide="shield" style="width:16px; color:var(--primary);"></i> PRASAKA MASTER</div>
-            <div style="font-size:10px; color:#94a3b8; font-weight:800;">v2.0 PRO</div>
+            <div class="ws-brand"><i data-lucide="shield" style="width:20px; color:var(--primary);"></i> PRASAKA MASTER</div>
+            <div style="font-size:11px; color:var(--primary); font-weight:900; background: var(--primary-light); padding: 6px 12px; border-radius: 12px;">v2.0 PRO</div>
         </div>
         <div class="ws-badge">
-            <i data-lucide="crosshair" style="width:12px;"></i> Sistem Absensi Radar GPS
+            <i data-lucide="crosshair" style="width:14px;"></i> Sistem Absensi Radar GPS
         </div>
         <h1 class="ws-title">Sistem Absensi Digital<br><span>Paskibra SMPN 22 Depok</span></h1>
-        <h2 class="ws-subtitle">untuk Anggota PRASAKA</h2>
-        <p class="ws-desc">Meningkatkan kedisiplinan dan akurasi kehadiran anggota dengan teknologi radar modern dan verifikasi titik kumpul *real-time*.</p>
-        <div style="text-align: center; margin-bottom: 30px; opacity: 0.5;">
-            <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); width: 80%; margin: 0 auto;"></div>
-        </div>
-        <div class="ws-btn-group">
-            <button onclick="masukKeLogin()" class="ws-btn-primary">Login/Daftar<i data-lucide="arrow-right" style="width:14px;"></i></button>
-            <button class="ws-btn-secondary">Lihat Panduan</button>
-        </div>
+        <h2 class="ws-subtitle">Area Khusus Admin</h2>
+        <p class="ws-desc">Kelola data kehadiran anggota PRASAKA dengan cepat dan akurat melalui pantauan Radar GPS dan verifikasi terpusat.</p>
+        
+        <button onclick="masukKeLogin()" class="auth-btn" style="margin-bottom: 40px; display: flex; justify-content: center; align-items: center; gap: 10px;">
+            Masuk / Daftar Admin <i data-lucide="arrow-right" style="width:18px;"></i>
+        </button>
+
         <div class="ws-stats-container">
             <div class="ws-stat-card">
                 <div class="ws-stat-head">
                     <span class="ws-stat-title">Total Anggota</span>
-                    <i data-lucide="users" style="width:16px; color:#94a3b8;"></i>
+                    <i data-lucide="users" style="width:18px; color:var(--primary);"></i>
                 </div>
                 <div class="ws-stat-val" id="ws-val-anggota">--</div>
             </div>
             <div class="ws-stat-card">
                 <div class="ws-stat-head">
-                    <span class="ws-stat-title">Status Sistem</span>
-                    <i data-lucide="radio" style="width:16px; color:var(--success);"></i>
+                    <span class="ws-stat-title">Status Server</span>
+                    <i data-lucide="radio" style="width:18px; color:var(--success);"></i>
                 </div>
-                <div class="ws-stat-val" style="font-size: 14px; color: var(--success); margin-top:auto;">ONLINE</div>
+                <div class="ws-stat-val" style="font-size: 16px; color: var(--success); margin-top:auto;">ONLINE</div>
             </div>
         </div>
     </div>
 
-    <div id="loading-overlay" style="position:fixed; inset:0; background:#020617; z-index:99999; display:none; flex-direction:column; justify-content:center; align-items:center; color:white;">
-        <div style="width:50px; height:50px; border: 5px solid rgba(56, 189, 248, 0.2); border-top-color: #38bdf8; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-        <h2 style="font-weight:900; letter-spacing:3px; color:#38bdf8; font-size:12px; margin-top:20px;">MEMPROSES...</h2>
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <h2 style="font-weight:900; letter-spacing:2px; color:var(--primary); font-size:12px; margin-top:20px;">MEMPROSES...</h2>
     </div>
 
     <div id="sys-dialog">
-        <div class="glass-card-popup">
+        <div class="dialog-card">
             <div id="sys-dialog-icon" style="margin-bottom:20px;"></div>
-            <h3 id="sys-dialog-title" style="font-weight:900; margin-bottom:10px;">TITLE</h3>
-            <p id="sys-dialog-msg" style="font-size:11px; color:#94a3b8; margin-bottom:25px; line-height:1.6;"></p>
+            <h3 id="sys-dialog-title" style="font-weight:900; margin-bottom:10px; color: var(--text-main);">TITLE</h3>
+            <p id="sys-dialog-msg" style="font-size:12px; color:var(--text-muted); margin-bottom:25px; line-height:1.6;"></p>
+            
+            <input type="text" id="sys-dialog-input" class="auth-input hidden" placeholder="Ketik..." style="margin-bottom: 20px;">
+            
             <div id="sys-dialog-btns" style="display:flex; gap:10px;"></div>
         </div>
     </div>
 
     <div id="auth-screen" style="display: none;">
         <div class="auth-card">
+            <div style="width: 70px; height: 70px; background: var(--primary-light); color: var(--primary); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;"><i data-lucide="shield-check" style="width: 35px; height: 35px;"></i></div>
             <h2 class="auth-title">ADMIN LOGIN</h2>
             <div id="login-form">
                 <input type="email" id="l-email" class="auth-input" placeholder="EMAIL ADMIN">
@@ -158,7 +200,7 @@
                     <option value="STRUKTUR">STRUKTUR</option>
                 </select>
                 <input type="password" id="r-pass" class="auth-input" placeholder="PASSWORD">
-                <button onclick="prosesRegisterAdmin()" class="auth-btn" style="background:var(--green-grad)">BUAT AKUN</button>
+                <button onclick="prosesRegisterAdmin()" class="auth-btn" style="background:var(--success)">BUAT AKUN</button>
                 <button onclick="toggleAuth()" class="auth-switch">KEMBALI LOGIN</button>
             </div>
         </div>
@@ -167,171 +209,190 @@
     <div id="main-admin-content">
         <div id="overlay" onclick="toggleSidebar()"></div>
         <div id="sidebar">
-            <div style="display:flex; align-items:center; gap:15px; margin-bottom:25px;">
-                <div class="avatar-circle" style="width:45px; height:45px; border-radius:15px; font-size:18px; margin:0;">A</div>
-                <div><h2 style="font-size:10px; color:var(--primary); font-weight:800;">DASHBOARD MENU</h2><h1 id="admin-name-display" style="font-size:13px; font-weight:800;">ADMIN</h1></div>
+            <div class="sb-user">
+                <div class="avatar-circle" id="sb-initial">A</div>
+                <div>
+                    <h2 style="font-size:10px; color:var(--text-muted); font-weight:800; text-transform:uppercase;">DASHBOARD MENU</h2>
+                    <h1 id="admin-name-display" style="font-size:15px; font-weight:900; color:var(--text-main);">ADMIN</h1>
+                </div>
             </div>
             <div class="sb-nav">
-                <button onclick="sw('p-dash')" class="sb-link btn-dash"><i data-lucide="layout-grid"></i> Dashboard</button>
-                <button onclick="sw('p-qr')" class="sb-link btn-qr"><i data-lucide="qr-code"></i> Tampilkan QR</button>
-                <button onclick="sw('p-prof')" class="sb-link btn-prof"><i data-lucide="user"></i> Profil Admin</button>
-                <button onclick="sw('p-log')" class="sb-link btn-log"><i data-lucide="clipboard-list"></i> Laporan</button>
-                <button onclick="sw('p-sis')" class="sb-link btn-sis"><i data-lucide="users"></i> Anggota</button>
-                <button onclick="sw('p-set')" class="sb-link btn-set"><i data-lucide="settings"></i> Settings</button>
+                <button onclick="sw('p-dash', this)" class="sb-link active-menu"><i data-lucide="layout-grid"></i> Dashboard</button>
+                <button onclick="sw('p-qr', this)" class="sb-link"><i data-lucide="qr-code"></i> Tampilkan QR</button>
+                <button onclick="sw('p-prof', this)" class="sb-link"><i data-lucide="user"></i> Profil Admin</button>
+                <button onclick="sw('p-log', this)" class="sb-link"><i data-lucide="clipboard-list"></i> Laporan</button>
+                <button onclick="sw('p-sis', this)" class="sb-link"><i data-lucide="users"></i> Data Anggota</button>
+                <button onclick="sw('p-set', this)" class="sb-link"><i data-lucide="settings"></i> Pengaturan</button>
             </div>
-            <button onclick="logoutAdmin()" class="sb-link btn-logout"><i data-lucide="log-out"></i> Logout</button>
+            <button onclick="logoutAdmin()" class="sb-link btn-logout"><i data-lucide="log-out"></i> Logout Sesi</button>
         </div>
 
         <header>
             <button class="btn-menu" onclick="toggleSidebar()"><i data-lucide="menu"></i></button>
-            <h1 style="font-size:18px; font-weight:800;">PRASAKA Admin</h1>
+            <h1 style="font-size:18px; font-weight:900; color:var(--text-main); letter-spacing:-0.5px;">PRASAKA Master</h1>
+            <div style="width:42px;"></div> <!-- Spacer -->
         </header>
 
         <main>
             <div id="p-dash" class="page active">
                 
-                <div id="status-banner" style="background: rgba(30, 41, 59, 0.5); border: 1px solid var(--border); border-radius: 20px; padding: 15px 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
-                    <div>
+                <div class="card-box" style="padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; border-left: 4px solid var(--primary);">
+                    <div style="display: flex; align-items: center;">
                         <span id="op-indicator" class="indicator ind-off"></span>
-                        <span id="op-text" style="font-size: 11px; font-weight: 800; letter-spacing: 1px;">SISTEM MEMUAT...</span>
+                        <span id="op-text" style="font-size: 12px; font-weight: 800; letter-spacing: 0.5px; color: var(--text-main);">SISTEM MEMUAT...</span>
                     </div>
-                    <i data-lucide="shield-check" style="width: 18px; opacity: 0.5;"></i>
+                    <i data-lucide="shield-check" style="width: 20px; color: var(--primary);"></i>
                 </div>
 
                 <div class="stat-grid">
-                    <div class="card-stat" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3);">
-                        <p style="font-size:9px; font-weight:800; color: #34d399; letter-spacing:1px;">HADIR</p>
-                        <h3 id="st-hadir" style="color:#10b981;">0</h3>
+                    <div class="card-stat">
+                        <p style="color: var(--text-muted);">HADIR</p>
+                        <h3 id="st-hadir" style="color:var(--success);">0</h3>
                     </div>
-                    <div class="card-stat" style="background: rgba(14, 165, 233, 0.1); border-color: rgba(14, 165, 233, 0.3);">
-                        <p style="font-size:9px; font-weight:800; color: #7dd3fc; letter-spacing:1px;">IZIN</p>
-                        <h3 id="st-izin" style="color:#0ea5e9;">0</h3>
+                    <div class="card-stat">
+                        <p style="color: var(--text-muted);">IZIN</p>
+                        <h3 id="st-izin" style="color:var(--primary);">0</h3>
                     </div>
-                    <div class="card-stat" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3);">
-                        <p style="font-size:9px; font-weight:800; color: #fca5a5; letter-spacing:1px;">TERLAMBAT</p>
-                        <h3 id="st-telat" style="color:#ef4444;">0</h3>
+                    <div class="card-stat">
+                        <p style="color: var(--text-muted);">TERLAMBAT</p>
+                        <h3 id="st-telat" style="color:var(--danger);">0</h3>
                     </div>
-                    <div class="card-stat" style="background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.3);">
-                        <p style="font-size:9px; font-weight:800; color: #c4b5fd; letter-spacing:1px;">TOTAL ANGGOTA</p>
-                        <h3 id="st-siswa" style="color:#8b5cf6;">0</h3>
+                    <div class="card-stat">
+                        <p style="color: var(--text-muted);">TOTAL ANGGOTA</p>
+                        <h3 id="st-siswa" style="color:var(--text-main);">0</h3>
                     </div>
                 </div>
 
-                <div class="glass-box" style="padding: 20px;">
+                <div class="card-box" style="padding: 20px;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size: 10px; font-weight: 800; color: #94a3b8;">RASIO KEHADIRAN</span>
-                        <span id="st-persen" style="font-size: 10px; font-weight: 900; color: var(--success);">0%</span>
+                        <span style="font-size: 11px; font-weight: 800; color: var(--text-muted);">RASIO KEHADIRAN AKTIF</span>
+                        <span id="st-persen" style="font-size: 14px; font-weight: 900; color: var(--primary);">0%</span>
                     </div>
                     <div class="progress-bg">
                         <div id="bar-hadir" class="progress-fill"></div>
                     </div>
                 </div>
 
-                <div class="glass-box">
-                    <p style="font-size: 10px; font-weight: 800; color: var(--primary); margin-bottom: 15px; display:flex; align-items:center; gap:6px;">
-                        <i data-lucide="radio" style="width:14px; animation: pulse 2s infinite;"></i> RADAR ABSENSI (LIVE)
+                <div class="card-box">
+                    <p style="font-size: 12px; font-weight: 800; color: var(--primary); margin-bottom: 20px; display:flex; align-items:center; gap:8px;">
+                        <i data-lucide="radio" style="width:16px; animation: pulse 2s infinite;"></i> RADAR ABSENSI (LIVE)
                     </p>
                     <div id="live-radar-list">
-                        </div>
+                        <!-- Content loaded by JS -->
+                    </div>
                 </div>
 
-                <div class="glass-box">
-                    <p style="font-size: 10px; font-weight: 800; color: #fb7185; margin-bottom: 15px;">MENUNGGU ACC</p>
+                <div class="card-box">
+                    <p style="font-size: 12px; font-weight: 800; color: var(--warning); margin-bottom: 20px; display:flex; align-items:center; gap:8px;">
+                        <i data-lucide="user-plus" style="width:16px;"></i> MENUNGGU ACC ADMIN
+                    </p>
                     <div id="list-pending"></div>
                 </div>
             </div>
 
             <div id="p-qr" class="page">
-                <div class="glass-box text-center">
-                    <p style="font-size: 10px; font-weight: 800; color: var(--primary); margin-bottom: 25px; display: flex; align-items:center; justify-content:center; gap:8px;"><i data-lucide="scan" style="width:16px;"></i> GENERATOR QR LATIHAN</p>
-                    <div style="background: white; padding: 25px; border-radius: 30px; display: inline-block; margin-bottom: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+                <div class="card-box text-center" style="text-align: center;">
+                    <p style="font-size: 12px; font-weight: 800; color: var(--text-main); margin-bottom: 25px; display: flex; align-items:center; justify-content:center; gap:8px;"><i data-lucide="scan" style="width:18px;"></i> GENERATOR QR LATIHAN</p>
+                    <div style="background: white; padding: 25px; border-radius: 30px; border: 2px solid var(--primary-light); display: inline-block; margin-bottom: 25px;">
                         <img id="qr-image" src="" alt="Menunggu Jadwal..." style="width: 220px; height: 220px; object-fit: contain;">
                     </div>
-                    <h3 style="font-size: 20px; font-weight: 900; margin-bottom: 5px; text-transform: uppercase;">Arahkan Kamera Ke QR</h3>
-                    <p id="qr-time-display" style="font-size: 12px; font-weight: 800; color: var(--success); margin-bottom: 25px; background: rgba(74, 222, 128, 0.1); padding: 10px; border-radius: 12px; display: inline-block;"></p>
-                    <button onclick="generateQR()" class="auth-btn" style="background: var(--cyan-grad);"><i data-lucide="refresh-cw" style="width:18px; display:inline-block; vertical-align:middle; margin-right:8px;"></i> PERBARUI QR</button>
+                    <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 10px; color: var(--text-main); text-transform: uppercase;">Arahkan Kamera Ke QR</h3>
+                    <p id="qr-time-display" style="font-size: 12px; font-weight: 800; color: var(--success); margin-bottom: 25px; background: #ecfdf5; padding: 12px 20px; border-radius: 12px; display: inline-block; border: 1px solid #a7f3d0;"></p>
+                    <button onclick="generateQR()" class="auth-btn" style="display: flex; justify-content: center; align-items: center; gap: 8px;"><i data-lucide="refresh-cw" style="width:18px;"></i> PERBARUI QR</button>
                 </div>
             </div>
 
             <div id="p-prof" class="page">
-                <div class="glass-box text-center">
-                    <div class="avatar-circle" id="prof-initial">A</div>
-                    <h2 id="prof-nama" style="font-weight:900; text-transform:uppercase; margin-bottom:5px;">-</h2>
-                    <p id="prof-role" style="font-size:10px; font-weight:800; color:var(--primary); letter-spacing:2px; margin-bottom:25px;">-</p>
+                <div class="card-box" style="text-align: center; padding: 40px 20px;">
+                    <div class="avatar-circle" id="prof-initial-card" style="width: 80px; height: 80px; font-size: 32px; margin: 0 auto 15px;">A</div>
+                    <h2 id="prof-nama" style="font-weight:900; color:var(--text-main); text-transform:uppercase; margin-bottom:5px;">-</h2>
+                    <p id="prof-role" style="font-size:12px; font-weight:800; color:var(--primary); letter-spacing:1px; margin-bottom:25px;">-</p>
                     
-                    <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 20px 15px; margin-bottom: 25px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                        <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(56, 189, 248, 0.1); padding: 6px 14px; border-radius: 12px; border: 1px solid rgba(56, 189, 248, 0.2);">
-                            <i data-lucide="mail" style="width: 12px; height: 12px; color: var(--primary);"></i>
-                            <span style="font-size: 9px; font-weight: 900; color: var(--primary); letter-spacing: 2px;">Pengaturan Sistem</span>
+                    <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 20px 15px; margin-bottom: 25px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                        <div style="display: inline-flex; align-items: center; gap: 6px; background: var(--primary-light); padding: 6px 14px; border-radius: 12px; border: 1px solid var(--border);">
+                            <i data-lucide="mail" style="width: 14px; color: var(--primary);"></i>
+                            <span style="font-size: 10px; font-weight: 900; color: var(--primary); letter-spacing: 1px;">Pengaturan Sistem</span>
                         </div>
-                        <span id="prof-email" style="font-size: 13px; font-weight: 800; color: #e2e8f0; word-break: break-all; text-align: center; line-height: 1.4;">-</span>
+                        <span id="prof-email" style="font-size: 14px; font-weight: 800; color: var(--text-main); word-break: break-all; text-align: center;">-</span>
                     </div>
 
-                    <button onclick="logoutAdmin()" class="auth-btn" style="background:var(--red-grad); margin-top:10px;">KELUAR SESI</button>
+                    <button onclick="toggleTheme()" class="auth-btn" style="background:var(--bg); color:var(--text-main); border:1px solid var(--border); margin-bottom:15px; box-shadow:none; display:flex; justify-content:center; align-items:center; gap:8px;">
+                        <i data-lucide="moon" id="theme-icon" style="width: 18px;"></i>
+                        <span id="theme-text">GANTI MODE GELAP</span>
+                    </button>
+
+                    <button onclick="logoutAdmin()" class="auth-btn" style="background:var(--danger); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25);">KELUAR SESI</button>
                 </div>
             </div>
 
             <div id="p-log" class="page">
-                <div class="glass-box">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                        <h3 style="font-size: 12px; font-weight: 800; color: var(--purple-grad);">LAPORAN ABSENSI</h3>
-                        <button onclick="svLaporan()" class="auth-btn" style="width:auto; padding:10px 20px; font-size:10px; background:var(--green-grad); margin:0;"><i data-lucide="download" style="width:14px; display:inline-block; vertical-align:middle; margin-right:5px;"></i> SV LAPORAN</button>
+                <div class="card-box" style="padding: 20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+                        <h3 style="font-size: 14px; font-weight: 900; color: var(--text-main); display:flex; align-items:center; gap:8px;"><i data-lucide="clipboard-list" style="width:18px; color:var(--primary);"></i> LAPORAN</h3>
+                        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                            <input type="month" id="filter-bulan" class="auth-input" style="width:auto; padding:10px 14px; margin:0; font-size:12px; border-radius:12px;" onchange="renderLaporan()" title="Filter Laporan Bulan">
+                            <button onclick="hapusSemuaLog()" class="auth-btn" style="width:auto; padding:12px 16px; font-size:11px; background:#fef2f2; border:1px solid var(--danger); color:var(--danger); margin:0; display:flex; align-items:center; gap:6px; box-shadow:none;"><i data-lucide="trash-2" style="width:14px;"></i> RESET</button>
+                            <button onclick="svLaporan()" class="auth-btn" style="width:auto; padding:12px 16px; font-size:11px; background:var(--success); margin:0; display:flex; align-items:center; gap:6px; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);"><i data-lucide="download" style="width:14px;"></i> EXCEL</button>
+                        </div>
                     </div>
                     <div id="tb-log"></div>
                 </div>
             </div>
             
             <div id="p-sis" class="page">
-                <div class="glass-box">
-                    <p style="font-size: 10px; font-weight: 800; color: var(--success); margin-bottom: 15px; display: flex; align-items:center; gap:8px;"><i data-lucide="users" style="width:16px;"></i> DATA SELURUH ANGGOTA</p>
+                <div class="card-box" style="padding: 20px;">
+                    <p style="font-size: 13px; font-weight: 900; color: var(--text-main); margin-bottom: 20px; display: flex; align-items:center; gap:8px;"><i data-lucide="users" style="width:18px; color:var(--primary);"></i> DATA SELURUH ANGGOTA</p>
                     <div id="grid-all"></div>
                 </div>
             </div>
 
             <div id="p-set" class="page">
-                <div class="glass-box" style="padding: 0; overflow: hidden;">
-                    <div style="display:flex; border-bottom:1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2);">
-                        <button class="set-tab active" onclick="switchSetTab('s-tab-notif', this)" style="flex:1; padding:15px 10px; background:none; border:none; color:var(--primary); font-size:10px; font-weight:900; border-bottom:2px solid var(--primary); transition:0.3s; cursor:pointer;"><i data-lucide="bell" style="width:14px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> NOTIF</button>
-                        <button class="set-tab" onclick="switchSetTab('s-tab-jam', this)" style="flex:1; padding:15px 10px; background:none; border:none; color:#94a3b8; font-size:10px; font-weight:800; border-bottom:2px solid transparent; transition:0.3s; cursor:pointer;"><i data-lucide="clock" style="width:14px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> JADWAL</button>
-                        <button class="set-tab" onclick="switchSetTab('s-tab-lokasi', this)" style="flex:1; padding:15px 10px; background:none; border:none; color:#94a3b8; font-size:10px; font-weight:800; border-bottom:2px solid transparent; transition:0.3s; cursor:pointer;"><i data-lucide="map-pin" style="width:14px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> LOKASI</button>
+                <div class="card-box" style="padding: 0; overflow: hidden;">
+                    <div style="display:flex; border-bottom:1px solid var(--border); background: var(--bg);">
+                        <button class="set-tab active" onclick="switchSetTab('s-tab-notif', this)"><i data-lucide="bell" style="width:14px;"></i> NOTIF</button>
+                        <button class="set-tab" onclick="switchSetTab('s-tab-jam', this)"><i data-lucide="clock" style="width:14px;"></i> JADWAL</button>
+                        <button class="set-tab" onclick="switchSetTab('s-tab-lokasi', this)"><i data-lucide="map-pin" style="width:14px;"></i> LOKASI</button>
                     </div>
 
-                    <div style="padding: 20px;">
+                    <div style="padding: 25px 20px;">
+                        <!-- TAB NOTIF -->
                         <div id="s-tab-notif" class="s-content" style="display:block; animation:slideUp 0.3s ease;">
-                            <label style="font-size:10px; font-weight:800; color:#94a3b8; display:block; margin-bottom:5px;">INFO CEPAT (RUNNING TEXT)</label>
-                            <input type="text" id="s-marquee" style="width:100%; padding:15px; background:rgba(0,0,0,0.3); border-radius:15px; color:white; border:1px solid var(--border); font-size:12px; margin-bottom:15px;" placeholder="Teks jalan di dashboard...">
+                            <label style="font-size:11px; font-weight:800; color:var(--text-muted); display:block; margin-bottom:8px;">INFO CEPAT (RUNNING TEXT)</label>
+                            <input type="text" id="s-marquee" class="auth-input" style="text-align:left; font-size:13px; font-weight:600;" placeholder="Teks jalan di dashboard...">
 
-                            <label style="font-size:10px; font-weight:800; color:#94a3b8; display:block; margin-bottom:5px;">ISI PENGUMUMAN (LONCENG)</label>
-                            <textarea id="s-ann" rows="4" style="width:100%; padding:15px; background:rgba(0,0,0,0.3); border-radius:15px; color:white; border:1px solid var(--border); font-size:12px; margin-bottom:5px;" placeholder="Ketik pengumuman panjang di sini..."></textarea>
-                            <p style="font-size:9px; color:#64748b; margin-bottom:15px;">*Teks ini akan muncul saat anggota klik ikon Lonceng.</p>
+                            <label style="font-size:11px; font-weight:800; color:var(--text-muted); display:block; margin-bottom:8px;">ISI PENGUMUMAN (LONCENG)</label>
+                            <textarea id="s-ann" class="auth-input" rows="4" style="text-align:left; font-size:13px; font-weight:600; resize:vertical; border-radius:16px;" placeholder="Ketik pengumuman panjang di sini..."></textarea>
+                            <p style="font-size:10px; color:var(--text-muted); margin-bottom:20px;">*Teks ini akan muncul saat anggota klik ikon Lonceng.</p>
                             
-                            <div style="display:flex; gap:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:15px;">
-                                <button onclick="saveNotif()" class="auth-btn" style="flex:2; background:var(--green-grad); margin:0; font-size:10px;"><i data-lucide="save" style="width:14px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> SIMPAN NOTIF</button>
-                                <button onclick="resetNotif()" class="auth-btn" style="flex:1; background:rgba(251, 113, 133, 0.1); border:1px solid var(--danger); color:var(--danger); margin:0; font-size:10px;"><i data-lucide="trash" style="width:14px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> HAPUS</button>
+                            <div style="display:flex; gap:12px; border-top:1px solid var(--border); padding-top:20px;">
+                                <button onclick="saveNotif()" class="auth-btn" style="flex:2; margin:0; font-size:11px; display:flex; justify-content:center; align-items:center; gap:8px;"><i data-lucide="save" style="width:16px;"></i> SIMPAN NOTIF</button>
+                                <button onclick="resetNotif()" class="auth-btn" style="flex:1; background:#fef2f2; border:1px solid var(--danger); color:var(--danger); margin:0; font-size:11px; display:flex; justify-content:center; align-items:center; gap:8px; box-shadow:none;"><i data-lucide="trash" style="width:16px;"></i> HAPUS</button>
                             </div>
                         </div>
 
+                        <!-- TAB JADWAL -->
                         <div id="s-tab-jam" class="s-content" style="display:none; animation:slideUp 0.3s ease;">
-                            <label style="font-size:10px; font-weight:800; color:#94a3b8; display:block; margin-bottom:10px;">BATAS JAM LATIHAN</label>
-                            <input type="time" id="s-tim" style="width:100%; padding:15px; background:rgba(0,0,0,0.3); border-radius:15px; color:white; border:1px solid var(--border); font-size:14px; margin-bottom:15px;">
+                            <label style="font-size:11px; font-weight:800; color:var(--text-muted); display:block; margin-bottom:8px;">BATAS JAM LATIHAN</label>
+                            <input type="time" id="s-tim" class="auth-input" style="font-size:16px; margin-bottom:20px;">
                             
-                            <div style="display:flex; gap:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:15px;">
-                                <button onclick="saveJam()" class="auth-btn" style="flex:2; background:var(--green-grad); margin:0; font-size:10px;"><i data-lucide="save" style="width:14px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> SIMPAN JADWAL</button>
-                                <button onclick="resetJam()" class="auth-btn" style="flex:1; background:rgba(251, 113, 133, 0.1); border:1px solid var(--danger); color:var(--danger); margin:0; font-size:10px;"><i data-lucide="power" style="width:14px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> TUTUP</button>
+                            <div style="display:flex; gap:12px; border-top:1px solid var(--border); padding-top:20px;">
+                                <button onclick="saveJam()" class="auth-btn" style="flex:2; margin:0; font-size:11px; display:flex; justify-content:center; align-items:center; gap:8px;"><i data-lucide="save" style="width:16px;"></i> SIMPAN JADWAL</button>
+                                <button onclick="resetJam()" class="auth-btn" style="flex:1; background:#fef2f2; border:1px solid var(--danger); color:var(--danger); margin:0; font-size:11px; display:flex; justify-content:center; align-items:center; gap:8px; box-shadow:none;"><i data-lucide="power" style="width:16px;"></i> TUTUP</button>
                             </div>
                         </div>
 
+                        <!-- TAB LOKASI -->
                         <div id="s-tab-lokasi" class="s-content" style="display:none; animation:slideUp 0.3s ease;">
-                            <label style="font-size:10px; font-weight:800; color:#94a3b8; display:block; margin-bottom:10px;">LOKASI RADAR GPS</label>
-                            <div style="display:flex; gap:10px; margin-bottom:10px;">
-                                <input type="text" id="s-lat" placeholder="Latitude" style="width:100%; padding:15px; background:rgba(0,0,0,0.3); border-radius:15px; color:#94a3b8; border:1px solid var(--border); font-size:12px;" readonly>
-                                <input type="text" id="s-lng" placeholder="Longitude" style="width:100%; padding:15px; background:rgba(0,0,0,0.3); border-radius:15px; color:#94a3b8; border:1px solid var(--border); font-size:12px;" readonly>
+                            <label style="font-size:11px; font-weight:800; color:var(--text-muted); display:block; margin-bottom:8px;">LOKASI RADAR GPS</label>
+                            <div style="display:flex; gap:12px; margin-bottom:10px;">
+                                <input type="text" id="s-lat" class="auth-input" placeholder="Latitude" style="font-size:12px; color:var(--text-muted); background:var(--bg);" readonly>
+                                <input type="text" id="s-lng" class="auth-input" placeholder="Longitude" style="font-size:12px; color:var(--text-muted); background:var(--bg);" readonly>
                             </div>
-                            <p style="font-size:9px; color:#64748b; margin-bottom:15px; text-align:center;">*Klik "Ambil & Simpan" untuk merekam lokasi kamu saat ini.</p>
+                            <p style="font-size:10px; color:var(--text-muted); margin-bottom:20px; text-align:center; font-weight:600;">*Klik "Ambil & Simpan" untuk merekam koordinat lokasi kamu saat ini sebagai Titik Kumpul.</p>
                             
-                            <div style="display:flex; gap:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:15px;">
-                                <button onclick="saveLokasi()" class="auth-btn" style="flex:2; background:var(--orange-grad); margin:0; font-size:10px;"><i data-lucide="crosshair" style="width:14px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> AMBIL & SIMPAN</button>
-                                <button onclick="resetLokasi()" class="auth-btn" style="flex:1; background:rgba(251, 113, 133, 0.1); border:1px solid var(--danger); color:var(--danger); margin:0; font-size:10px;"><i data-lucide="trash" style="width:14px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> HAPUS</button>
+                            <div style="display:flex; gap:12px; border-top:1px solid var(--border); padding-top:20px;">
+                                <button onclick="saveLokasi()" class="auth-btn" style="flex:2; background:var(--success); margin:0; font-size:11px; display:flex; justify-content:center; align-items:center; gap:8px; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);"><i data-lucide="crosshair" style="width:16px;"></i> AMBIL & SIMPAN</button>
+                                <button onclick="resetLokasi()" class="auth-btn" style="flex:1; background:#fef2f2; border:1px solid var(--danger); color:var(--danger); margin:0; font-size:11px; display:flex; justify-content:center; align-items:center; gap:8px; box-shadow:none;"><i data-lucide="trash" style="width:16px;"></i> HAPUS</button>
                             </div>
                         </div>
                     </div>
@@ -345,26 +406,27 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxieMyuN0q4QbCHIQAYj4gMKj1U-AlF2NM1Elbvs11MITj5Wrgdafblkd-YkqDFFeUJ/exec"; 
 
         let globalLogs = [];
+        let dialogTimeout = null; 
 
         function requestData(params) {
-    return new Promise(async (resolve, reject) => {
-        try {
-            // Kita pake URLSearchParams biar browser otomatis set mode POST yang aman dari blokir CORS
-            const response = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: new URLSearchParams(params) 
+            return new Promise(async (resolve, reject) => {
+                try {
+                    const response = await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        body: new URLSearchParams(params) 
+                    });
+                    
+                    if (!response.ok) throw new Error("Koneksi Error");
+                    
+                    const data = await response.json();
+                    resolve(data);
+                } catch (error) {
+                    console.error("Gagal Request:", error);
+                    reject(new Error("Koneksi HQ Terputus!"));
+                }
             });
-            
-            if (!response.ok) throw new Error("Koneksi Error");
-            
-            const data = await response.json();
-            resolve(data);
-        } catch (error) {
-            console.error("Gagal Request:", error);
-            reject(new Error("Koneksi HQ Terputus!"));
         }
-    });
-}
+
         async function fetchWelcomeStats() {
             try {
                 const data = await requestData(`auth=true`);
@@ -377,35 +439,67 @@
 
         async function showSysDialog(opts) {
             return new Promise((resolve) => {
+                clearTimeout(dialogTimeout);
+                
                 const el = document.getElementById('sys-dialog');
                 document.getElementById('sys-dialog-title').innerText = opts.title || "INFO";
+                document.getElementById('sys-dialog-title').style.color = opts.color || "var(--text-main)";
                 document.getElementById('sys-dialog-msg').innerText = opts.msg || "";
+                
+                const inp = document.getElementById('sys-dialog-input');
+                if (opts.prompt) {
+                    inp.classList.remove('hidden');
+                    inp.value = '';
+                    inp.placeholder = opts.placeholder || '';
+                    setTimeout(() => inp.focus(), 100);
+                } else {
+                    inp.classList.add('hidden');
+                }
+
                 const btns = document.getElementById('sys-dialog-btns');
                 btns.innerHTML = '';
                 
                 if(opts.showCancel) {
                     const btnC = document.createElement('button');
-                    btnC.style.cssText = "flex: 1; padding: 16px; border-radius: 16px; font-weight: 900; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; cursor: pointer;";
+                    btnC.style.cssText = "flex: 1; padding: 16px; border-radius: 14px; font-weight: 900; background: var(--bg); border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; transition: 0.2s;";
                     btnC.innerText = "BATAL"; btnC.onclick = () => { closeSysDialog(); resolve(false); };
                     btns.appendChild(btnC);
                 }
                 
                 const btnO = document.createElement('button');
-                btnO.style.cssText = "flex: 1; padding: 16px; border-radius: 16px; font-weight: 900; background:" + (opts.color || "var(--primary)") + "; color:#0f172a; border:none; cursor:pointer;";
+                btnO.style.cssText = "flex: 1; padding: 16px; border-radius: 14px; font-weight: 900; background:" + (opts.color || "var(--primary)") + "; color:white; border:none; cursor:pointer; transition: 0.2s; box-shadow: 0 4px 10px " + (opts.color ? opts.color+'40' : "rgba(37, 99, 235, 0.25)");
                 btnO.innerText = opts.confirmText || "OKE";
-                btnO.onclick = () => { closeSysDialog(); resolve(true); };
+                btnO.onclick = () => { 
+                    const val = opts.prompt ? inp.value.trim() : true;
+                    closeSysDialog(); resolve(val); 
+                };
                 btns.appendChild(btnO);
                 
                 const iconContainer = document.getElementById('sys-dialog-icon');
-                iconContainer.innerHTML = `<i data-lucide="${opts.type==='success'?'check-circle':'shield-alert'}" style="width:40px; height:40px; color:${opts.color||'var(--primary)'}"></i>`;
+                iconContainer.innerHTML = `<i data-lucide="${opts.type==='success'?'check-circle':'alert-circle'}" style="width:45px; height:45px; color:${opts.color||'var(--primary)'}"></i>`;
                 el.style.display = 'flex'; lucide.createIcons();
                 setTimeout(() => el.classList.add('active'), 10);
             });
         }
 
-        function closeSysDialog() { document.getElementById('sys-dialog').classList.remove('active'); setTimeout(() => { document.getElementById('sys-dialog').style.display = 'none'; }, 300); }
+        function closeSysDialog() { 
+            document.getElementById('sys-dialog').classList.remove('active'); 
+            dialogTimeout = setTimeout(() => { document.getElementById('sys-dialog').style.display = 'none'; }, 300); 
+        }
+        
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').style.display = document.getElementById('sidebar').classList.contains('open') ? 'block' : 'none'; }
-        function sw(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); toggleSidebar(); }
+        
+        function sw(id, btnEl) { 
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); 
+            document.getElementById(id).classList.add('active'); 
+            
+            if(btnEl) {
+                document.querySelectorAll('.sb-link').forEach(b => b.classList.remove('active-menu'));
+                btnEl.classList.add('active-menu');
+            }
+            toggleSidebar(); 
+        }
+        
         function toggleAuth() { document.getElementById('login-form').classList.toggle('hidden'); document.getElementById('reg-form').classList.toggle('hidden'); }
         function logoutAdmin() { localStorage.removeItem('admin_auth'); location.reload(); }
 
@@ -420,14 +514,8 @@
         function switchSetTab(tabId, el) {
             document.querySelectorAll('.s-content').forEach(c => c.style.display = 'none');
             document.getElementById(tabId).style.display = 'block';
-            document.querySelectorAll('.set-tab').forEach(b => {
-                b.style.color = '#94a3b8';
-                b.style.borderBottom = '2px solid transparent';
-                b.style.fontWeight = '800';
-            });
-            el.style.color = 'var(--primary)';
-            el.style.borderBottom = '2px solid var(--primary)';
-            el.style.fontWeight = '900';
+            document.querySelectorAll('.set-tab').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
             lucide.createIcons();
         }
 
@@ -452,11 +540,120 @@
             }
         }
 
+        async function hapusSemuaLog() {
+            if(!globalLogs || globalLogs.length === 0) {
+                return showSysDialog({title: "INFO", msg: "Data laporan absen sudah kosong.", type: "info", color: "var(--primary)"});
+            }
+
+            const peringatan = await showSysDialog({
+                title: "PERINGATAN BAHAYA!", 
+                msg: "Yakin mau menghapus SELURUH data riwayat absen? Data yang dihapus tidak bisa dikembalikan!", 
+                showCancel: true, 
+                confirmText: "YAKIN, HAPUS!", 
+                color: "var(--danger)"
+            });
+
+            if(!peringatan) return; 
+            
+            const ketikKonfirmasi = await showSysDialog({
+                title: "KONFIRMASI AKHIR",
+                msg: "Ketik kata 'HAPUS' untuk melanjutkan:",
+                prompt: true,
+                placeholder: "Ketik HAPUS di sini...",
+                showCancel: true,
+                confirmText: "EKSEKUSI",
+                color: "var(--danger)"
+            });
+
+            if (String(ketikKonfirmasi).toUpperCase() !== "HAPUS") {
+                await showSysDialog({title: "BATAL", msg: "Kata kunci salah. Penghapusan dibatalkan.", type: "error", color: "var(--danger)"});
+                return;
+            }
+
+            document.getElementById('loading-overlay').style.display = 'flex';
+            try {
+                const res = await requestData(`action=deleteAllLogs`);
+                document.getElementById('loading-overlay').style.display = 'none';
+                
+                if (res.status === "success") {
+                    await showSysDialog({title: "BERHASIL!", msg: "Seluruh data riwayat absen telah hangus terbakar.", type: "success", color: "var(--success)"});
+                    fetchData(); 
+                } else {
+                    await showSysDialog({title: "INFO", msg: res.msg, type: "error", color: "var(--danger)"});
+                }
+            } catch(e) {
+                document.getElementById('loading-overlay').style.display = 'none';
+                await showSysDialog({title: "GAGAL", msg: "Server gagal merespon.", type: "error", color: "var(--danger)"});
+            }
+        }
+
+        function renderLaporan() {
+            const filterVal = document.getElementById('filter-bulan').value; // Format: YYYY-MM
+            let filteredLogs = globalLogs;
+            
+            if(filterVal) {
+                const [y, m] = filterVal.split('-');
+                filteredLogs = globalLogs.filter(l => {
+                    if(!l.tanggal) return false;
+                    const dStr = String(l.tanggal);
+                    // Support format YYYY-MM-DD dan DD/MM/YYYY dari spreadsheet
+                    return dStr.startsWith(`${y}-${m}`) || dStr.includes(`/${m}/${y}`) || dStr.includes(`-${m}-${y}`);
+                });
+            }
+
+            document.getElementById('tb-log').innerHTML = filteredLogs.map(l => {
+                let j = l.jam || '--:--';
+                if(String(j).includes('T')) { const d = new Date(j); j = d.getHours().toString().padStart(2,'0') + ":" + d.getMinutes().toString().padStart(2,'0'); }
+                let tglRapi = l.tanggal ? String(l.tanggal).substring(0,10) : '-';
+                
+                let col = (l.status === 'TEPAT WAKTU' || l.status === 'HADIR') ? 'var(--success)' : (l.status === 'IZIN' ? 'var(--primary)' : 'var(--danger)');
+                let bgCol = (l.status === 'TEPAT WAKTU' || l.status === 'HADIR') ? '#ecfdf5' : (l.status === 'IZIN' ? 'var(--primary-light)' : '#fef2f2');
+                
+                let ketText = l.keterangan ? l.keterangan : (l.status === 'IZIN' ? 'Tanpa Alasan' : 'Scan QR');
+                
+                return `
+                <div class="data-row" style="flex-direction: column; gap: 10px; align-items: stretch;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <b style="font-size: 13px; text-transform: uppercase; color:var(--text-main); font-weight:900;">${l.nama}</b>
+                        </div>
+                        <button onclick="hapusData('Log', ${l.rowId})" style="color:var(--danger); background:#fef2f2; border:none; border-radius:10px; cursor:pointer; padding:8px;">
+                            <i data-lucide="trash-2" style="width:14px;"></i>
+                        </button>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 10px;">
+                        <div style="display:flex; flex-direction:column; gap:4px;">
+                            <small style="color: var(--text-muted); font-weight: 800; font-size: 10px; display:flex; align-items:center; gap:4px;"><i data-lucide="clock" style="width:12px;"></i> ${tglRapi} | ${j}</small>
+                            <small style="color: var(--text-muted); font-weight: 600; font-size: 10px; font-style: italic;">Ket: ${ketText}</small>
+                        </div>
+                        <span style="font-size:9px; font-weight:900; color:${col}; background:${bgCol}; padding:6px 10px; border-radius:10px;">${l.status}</span>
+                    </div>
+                </div>`;
+            }).join('') || '<p style="text-align:center; color:var(--text-muted); font-size:12px; font-weight:700; padding: 20px;">Belum ada data absen.</p>';
+            lucide.createIcons();
+        }
+
         function svLaporan() {
-            if(!globalLogs || globalLogs.length === 0) return alert("Data log kosong!");
+            if(!globalLogs || globalLogs.length === 0) return showSysDialog({title: "KOSONG", msg: "Data laporan absen belum ada.", type: "error", color: "var(--danger)"});
+            
+            const filterVal = document.getElementById('filter-bulan').value;
+            let filteredLogs = globalLogs;
+            let bulanText = "Semua";
+            
+            if(filterVal) {
+                const [y, m] = filterVal.split('-');
+                bulanText = `${m}-${y}`;
+                filteredLogs = globalLogs.filter(l => {
+                    if(!l.tanggal) return false;
+                    const dStr = String(l.tanggal);
+                    return dStr.startsWith(`${y}-${m}`) || dStr.includes(`/${m}/${y}`) || dStr.includes(`-${m}-${y}`);
+                });
+            }
+
+            if(filteredLogs.length === 0) return showSysDialog({title: "KOSONG", msg: "Tidak ada data absen untuk bulan yang dipilih.", type: "error", color: "var(--warning)"});
             
             const dataHeader = [["Tanggal", "Jam", "Nama", "Status", "Poin", "Keterangan"]];
-            const dataRows = globalLogs.map(l => {
+            const dataRows = filteredLogs.map(l => {
                 let tgl = l.tanggal ? String(l.tanggal).substring(0, 10) : "";
                 let jam = l.jam;
                 if (String(jam).includes('T')) {
@@ -471,17 +668,26 @@
             const ws = XLSX.utils.aoa_to_sheet(finalData);
 
             ws['!cols'] = [
-                { wch: 15 }, // Tanggal
-                { wch: 10 }, // Jam
-                { wch: 30 }, // Nama
-                { wch: 15 }, // Status
-                { wch: 10 }, // Poin
-                { wch: 30 }  // Keterangan
+                { wch: 15 }, { wch: 10 }, { wch: 30 }, { wch: 15 }, { wch: 10 }, { wch: 30 }
             ];
 
             XLSX.utils.book_append_sheet(wb, ws, "Laporan Absensi");
             const dateStr = new Date().toLocaleDateString('id-ID').replace(/\//g, '-');
-            XLSX.writeFile(wb, `Rekap_Absen_Prasaka_${dateStr}.xlsx`);
+            XLSX.writeFile(wb, `Rekap_Absen_Prasaka_${bulanText}_${dateStr}.xlsx`);
+        }
+
+        function japriWA(nama, phone) {
+            if (!phone || phone === '-' || phone.trim() === '') {
+                return showSysDialog({title: "GAGAL", msg: "Nomor WhatsApp tidak tersedia untuk anggota ini.", type: "error", color: "var(--danger)"});
+            }
+            
+            let waNum = phone.replace(/\D/g, ''); // bersihin karakter selain angka
+            if (waNum.startsWith('0')) {
+                waNum = '62' + waNum.substring(1); // ubah awalan 0 jadi 62
+            }
+            
+            const text = encodeURIComponent(`Halo ${nama}, kamu belum absen latihan hari ini. Tolong segera konfirmasi kehadiran atau ajukan form izin di portal ya. Terima kasih!`);
+            window.open(`https://wa.me/${waNum}?text=${text}`, '_blank');
         }
 
         function generateQR() {
@@ -492,13 +698,13 @@
             if (!time || time.trim() === "") {
                 qrImage.src = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=JADWAL_KOSONG";
                 qrImage.style.opacity = "0.2"; qrDisplay.innerText = "TIDAK ADA JADWAL LATIHAN";
-                qrDisplay.style.color = "var(--danger)"; qrDisplay.style.background = "rgba(251, 113, 133, 0.1)";
+                qrDisplay.style.color = "var(--danger)"; qrDisplay.style.background = "#fef2f2"; qrDisplay.style.borderColor = "#fecaca";
             } else {
                 const d = new Date(); const today = d.getDate().toString().padStart(2,'0') + (d.getMonth()+1).toString().padStart(2,'0') + d.getFullYear(); 
                 const qrData = `PRASAKA22_ABSEN_${today}_${time}`;
                 qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`;
                 qrImage.style.opacity = "1"; qrDisplay.innerText = `BATAS ABSEN MASUK: ${time} WIB`;
-                qrDisplay.style.color = "var(--success)"; qrDisplay.style.background = "rgba(74, 222, 128, 0.1)";
+                qrDisplay.style.color = "var(--success)"; qrDisplay.style.background = "#ecfdf5"; qrDisplay.style.borderColor = "#a7f3d0";
             }
         }
 
@@ -520,6 +726,9 @@
             document.getElementById('prof-nama').innerText = info.nama;
             document.getElementById('prof-role').innerText = info.role;
             document.getElementById('prof-email').innerText = info.email || "-";
+            document.getElementById('sb-initial').innerText = info.nama.charAt(0);
+            document.getElementById('prof-initial-card').innerText = info.nama.charAt(0);
+            
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('main-admin-content').style.display = 'block';
             fetchData();
@@ -555,13 +764,13 @@
             if (!jamLatihan || jamLatihan.trim() === "") {
                 opInd.className = "indicator ind-off";
                 opText.innerText = "LOKASI DITUTUP - TIDAK ADA JADWAL";
-                opText.style.color = "#fca5a5";
+                opText.style.color = "var(--danger)";
             } else {
                 opInd.className = "indicator ind-on";
                 let jamRapi = jamLatihan;
                 if (jamRapi.includes('T')) { const d = new Date(jamRapi); jamRapi = d.getHours().toString().padStart(2,'0') + ":" + d.getMinutes().toString().padStart(2,'0'); }
                 opText.innerText = `LATIHAN AKTIF - BATAS: ${jamRapi} WIB`;
-                opText.style.color = "#6ee7b7";
+                opText.style.color = "var(--success)";
             }
 
             const radarBox = document.getElementById('live-radar-list');
@@ -569,16 +778,19 @@
             radarBox.innerHTML = radarData.map(l => {
                 let j = l.jam;
                 if(String(j).includes('T')) { const d = new Date(j); j = d.getHours().toString().padStart(2,'0')+":"+d.getMinutes().toString().padStart(2,'0'); }
-                let col = (l.status === 'TEPAT WAKTU' || l.status === 'HADIR') ? '#34d399' : (l.status === 'IZIN' ? '#38bdf8' : '#fb7185');
+                
+                let col = (l.status === 'TEPAT WAKTU' || l.status === 'HADIR') ? 'var(--success)' : (l.status === 'IZIN' ? 'var(--primary)' : 'var(--danger)');
+                let bgCol = (l.status === 'TEPAT WAKTU' || l.status === 'HADIR') ? '#ecfdf5' : (l.status === 'IZIN' ? 'var(--primary-light)' : '#fef2f2');
+                
                 return `
-                <div style="display:flex; justify-content:space-between; align-items:center; padding: 12px; background:rgba(0,0,0,0.2); border-radius:12px; margin-bottom:8px; border-left: 3px solid ${col};">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding: 14px; background:var(--bg); border:1px solid var(--border); border-radius:16px; margin-bottom:10px; border-left: 4px solid ${col};">
                     <div>
-                        <p style="font-size:11px; font-weight:800; color:white; text-transform:uppercase;">${l.nama}</p>
-                        <p style="font-size:9px; color:#94a3b8;">${j} | ${l.keterangan || 'Lapor'}</p>
+                        <p style="font-size:12px; font-weight:900; color:var(--text-main); text-transform:uppercase; margin-bottom:2px;">${l.nama}</p>
+                        <p style="font-size:10px; color:var(--text-muted); font-weight:700;">${j} | ${l.keterangan || 'Lapor'}</p>
                     </div>
-                    <span style="font-size:8px; font-weight:900; color:${col}; background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:6px;">${l.status}</span>
+                    <span style="font-size:9px; font-weight:900; color:${col}; background:${bgCol}; padding:6px 10px; border-radius:10px;">${l.status}</span>
                 </div>`;
-            }).join('') || '<p style="text-align:center; font-size:10px; color:#64748b;">Radar Sepi...</p>';
+            }).join('') || '<p style="text-align:center; font-size:11px; font-weight:700; color:var(--text-muted); padding: 15px;">Belum ada tangkapan Radar...</p>';
         }
 
         async function fetchData() {
@@ -596,45 +808,29 @@
                 updateDashboardUI(data); 
 
                 document.getElementById('grid-all').innerHTML = data.siswa.map(s=>`
-                    <div class="data-row" style="align-items: flex-start; flex-direction: column; gap: 4px;">
-                        <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
-                            <div><b style="font-size: 13px;">${s.nama}</b><br><small style="color: var(--primary); font-weight: 800;">${s.role} | ANGKATAN ${s.angkatan || '-'}</small></div>
-                            <button onclick="hapusData('Siswa',${s.rowId})" style="color:var(--danger); background:none; border:none; cursor:pointer; padding:5px;"><i data-lucide="trash-2" style="width:16px;"></i></button>
+                    <div class="data-row">
+                        <div style="flex:1;">
+                            <b style="font-size: 13px; color: var(--text-main); font-weight:900;">${s.nama}</b><br>
+                            <small style="color: var(--primary); font-weight: 800; font-size:10px;">${s.role} | ANGKATAN ${s.angkatan || '-'}</small>
+                            <div style="display: flex; gap: 10px; align-items: center; margin-top: 6px;">
+                                <small style="color: var(--text-muted); font-weight: 700; font-size:10px;"><i data-lucide="phone" style="width:10px; display:inline-block;"></i> ${s.phone || '-'}</small>
+                                <span class="status-tag ${s.status === 'ACTIVE' ? 'status-active' : 'status-pending'}" style="font-size:8px; padding:3px 6px;">${s.status}</span>
+                            </div>
                         </div>
-                        <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.05);">
-                            <small style="color: #94a3b8; font-weight: 700;">WA: ${s.phone || '-'}</small>
-                            <span class="status-tag ${s.status === 'ACTIVE' ? 'status-active' : 'status-pending'}">${s.status}</span>
+                        <div style="display:flex; gap:8px;">
+                            <button onclick="japriWA('${s.nama}', '${s.phone}')" style="color:white; background:var(--success); border:none; border-radius:12px; cursor:pointer; padding:10px; transition:0.2s;" title="Tegur via WhatsApp"><i data-lucide="message-circle" style="width:16px;"></i></button>
+                            <button onclick="hapusData('Siswa',${s.rowId})" style="color:var(--danger); background:#fef2f2; border:1px solid #fecaca; border-radius:12px; cursor:pointer; padding:10px; transition:0.2s;" title="Hapus Akun"><i data-lucide="trash-2" style="width:16px;"></i></button>
                         </div>
                     </div>
                 `).join('');
 
-                document.getElementById('tb-log').innerHTML = data.logs.map(l => {
-                    let j = l.jam || '--:--';
-                    if(String(j).includes('T')) { const d = new Date(j); j = d.getHours().toString().padStart(2,'0') + ":" + d.getMinutes().toString().padStart(2,'0'); }
-                    let tglRapi = l.tanggal ? String(l.tanggal).substring(0,10) : '-';
-                    let statusClass = "status-pending"; let statusStyle = "";
-                    if(l.status === 'TEPAT WAKTU' || l.status === 'HADIR') { statusClass = "status-active"; } 
-                    else if (l.status === 'IZIN') { statusClass = ""; statusStyle = "background: rgba(56, 189, 248, 0.15); color: var(--primary); border: 1px solid rgba(56, 189, 248, 0.3);"; }
-                    let ketText = l.keterangan ? l.keterangan : (l.status === 'IZIN' ? 'Tanpa Alasan' : 'Scan QR');
-                    return `
-                    <div class="data-row" style="align-items: flex-start; flex-direction: column; gap: 8px;">
-                        <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
-                            <div style="display:flex; align-items:center; gap:10px;">
-                                <b style="font-size: 13px; text-transform: uppercase;">${l.nama}</b>
-                                <span class="status-tag ${statusClass}" style="${statusStyle}">${l.status}</span>
-                            </div>
-                            <button onclick="hapusData('Log', ${l.rowId})" style="color:var(--danger); background:none; border:none; cursor:pointer; padding:5px;">
-                                <i data-lucide="trash-2" style="width:14px;"></i>
-                            </button>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px;">
-                            <small style="color: #94a3b8; font-weight: 700; font-size: 10px; display:flex; align-items:center; gap:4px;"><i data-lucide="clock" style="width:12px; height:12px;"></i> ${tglRapi} | ${j}</small>
-                            <small style="color: #cbd5e1; font-weight: 600; font-size: 10px; max-width: 50%; text-align: right; font-style: italic;">(${ketText})</small>
-                        </div>
-                    </div>`;
-                }).join('') || '<p style="text-align:center; opacity:0.3; font-size:10px; padding: 20px;">BELUM ADA DATA ABSEN</p>';
+                renderLaporan();
                 
-                document.getElementById('list-pending').innerHTML = data.siswa.filter(s=>s.status==='PENDING').map(s=>`<div class="data-row"><span>${s.nama}</span><button onclick="acc(${s.rowId})" style="background:var(--success); color:#0f172a; padding:8px 12px; border:none; border-radius:10px; font-weight:800; font-size:10px; cursor:pointer;">ACC</button></div>`).join('') || '<p style="text-align:center; opacity:0.3; font-size:10px;">BERSIH</p>';
+                document.getElementById('list-pending').innerHTML = data.siswa.filter(s=>s.status==='PENDING').map(s=>`
+                    <div class="data-row">
+                        <span style="font-size:13px; font-weight:800; color:var(--text-main);">${s.nama}</span>
+                        <button onclick="acc(${s.rowId})" style="background:var(--success); color:white; padding:10px 16px; border:none; border-radius:12px; font-weight:900; font-size:11px; cursor:pointer; box-shadow:0 4px 10px rgba(16, 185, 129, 0.2);">ACC</button>
+                    </div>`).join('') || '<p style="text-align:center; color:var(--text-muted); font-size:11px; font-weight:700;">Tidak ada anggota menunggu ACC.</p>';
                 lucide.createIcons();
             }
         }
@@ -643,12 +839,12 @@
             document.getElementById('loading-overlay').style.display = 'flex';
             await requestData(`action=approve&rowId=${r}`); 
             document.getElementById('loading-overlay').style.display = 'none';
-            await showSysDialog({title:"SUKSES", msg:"Anggota disetujui!", type:"success", color:"var(--success)"}); 
+            await showSysDialog({title:"SUKSES", msg:"Anggota berhasil di-ACC!", type:"success", color:"var(--success)"}); 
             fetchData(); 
         }
 
         async function hapusData(sheet, id) {
-            const ok = await showSysDialog({title: "KONFIRMASI", msg: "Hapus data ini secara permanen?", showCancel: true, color: "var(--danger)"});
+            const ok = await showSysDialog({title: "KONFIRMASI", msg: "Hapus data ini secara permanen dari database?", showCancel: true, color: "var(--danger)"});
             if(!ok) return;
             document.getElementById('loading-overlay').style.display = 'flex';
             try { const res = await requestData(`action=deleteData&targetSheet=${sheet}&rowId=${id}`); if(res.status === 'success') { fetchData(); } } catch(e) {}
@@ -752,8 +948,35 @@
             await saveConfigData(ann, marq, tim, "", "", "Lokasi radar berhasil dikosongkan.");
         }
 
+        function toggleTheme() {
+            const isDark = document.body.classList.toggle('dark-theme');
+            localStorage.setItem('prasaka_admin_theme', isDark ? 'dark' : 'light');
+            updateThemeUI(isDark);
+        }
+
+        function updateThemeUI(isDark) {
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            if(isDark) {
+                if(icon) icon.setAttribute('data-lucide', 'sun');
+                if(text) text.innerText = 'GANTI MODE TERANG';
+            } else {
+                if(icon) icon.setAttribute('data-lucide', 'moon');
+                if(text) text.innerText = 'GANTI MODE GELAP';
+            }
+            lucide.createIcons();
+        }
+
         window.onload = () => { 
             lucide.createIcons();
+            
+            // Cek Tema Tersimpan
+            const savedTheme = localStorage.getItem('prasaka_admin_theme');
+            if(savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+                updateThemeUI(true);
+            }
+
             const s = localStorage.getItem('admin_auth'); 
             fetchWelcomeStats(); 
             if(s) { document.getElementById('welcome-screen').style.display = 'none'; masukKeDashboard(JSON.parse(s).info); }
