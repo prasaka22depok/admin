@@ -222,6 +222,7 @@
                 <button onclick="sw('p-prof', this)" class="sb-link"><i data-lucide="user"></i> Profil Admin</button>
                 <button onclick="sw('p-log', this)" class="sb-link"><i data-lucide="clipboard-list"></i> Laporan</button>
                 <button onclick="sw('p-sis', this)" class="sb-link"><i data-lucide="users"></i> Data Anggota</button>
+                <button onclick="sw('p-peringkat', this)" class="sb-link"><i data-lucide="trophy"></i> Peringkat Poin</button>
                 <button onclick="sw('p-set', this)" class="sb-link"><i data-lucide="settings"></i> Pengaturan</button>
             </div>
             <button onclick="logoutAdmin()" class="sb-link btn-logout"><i data-lucide="log-out"></i> Logout Sesi</button>
@@ -283,9 +284,12 @@
                 </div>
 
                 <div class="card-box">
-                    <p style="font-size: 12px; font-weight: 800; color: var(--warning); margin-bottom: 20px; display:flex; align-items:center; gap:8px;">
-                        <i data-lucide="user-plus" style="width:16px;"></i> MENUNGGU ACC ADMIN
-                    </p>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                        <p style="font-size: 12px; font-weight: 800; color: var(--warning); display:flex; align-items:center; gap:8px; margin:0;">
+                            <i data-lucide="user-plus" style="width:16px;"></i> MENUNGGU ACC ADMIN
+                        </p>
+                        <button onclick="fetchData()" style="background:var(--primary-light); color:var(--primary); border:none; padding:6px 12px; border-radius:8px; font-size:10px; font-weight:800; cursor:pointer; display:flex; gap:4px; align-items:center;"><i data-lucide="refresh-cw" style="width:12px;"></i> MUAT ULANG</button>
+                    </div>
                     <div id="list-pending"></div>
                 </div>
             </div>
@@ -335,14 +339,44 @@
                             <button onclick="svLaporan()" class="auth-btn" style="width:auto; padding:12px 16px; font-size:11px; background:var(--success); margin:0; display:flex; align-items:center; gap:6px; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);"><i data-lucide="download" style="width:14px;"></i> EXCEL</button>
                         </div>
                     </div>
+
+                    <!-- FITUR AUTO WA ALPA DENGAN POSISI YANG BENAR -->
+                    <div style="background: #fff7ed; border: 1px solid #fdba74; padding: 15px; border-radius: 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <p style="font-size:12px; font-weight:900; color:#d97706; margin-bottom:4px; display:flex; align-items:center; gap:6px;"><i data-lucide="bot" style="width:16px;"></i> AUTO WA TEGURAN ALPA</p>
+                            <p style="font-size:10px; color:var(--text-muted); font-weight:600; line-height:1.4;">Kirim pesan WA otomatis ke anggota yang belum absen (Alpa) hari ini.</p>
+                        </div>
+                        <button onclick="triggerWaAlpa()" class="auth-btn" style="background: #d97706; width: auto; padding: 10px 15px; font-size: 11px; margin: 0; box-shadow: 0 4px 10px rgba(217, 119, 6, 0.2); flex-shrink:0; display:flex; align-items:center; gap:6px;"><i data-lucide="send" style="width:14px;"></i> EKSEKUSI</button>
+                    </div>
+
                     <div id="tb-log"></div>
                 </div>
             </div>
             
             <div id="p-sis" class="page">
                 <div class="card-box" style="padding: 20px;">
-                    <p style="font-size: 13px; font-weight: 900; color: var(--text-main); margin-bottom: 20px; display: flex; align-items:center; gap:8px;"><i data-lucide="users" style="width:18px; color:var(--primary);"></i> DATA SELURUH ANGGOTA</p>
+                    <p style="font-size: 13px; font-weight: 900; color: var(--text-main); margin-bottom: 15px; display: flex; align-items:center; gap:8px;"><i data-lucide="users" style="width:18px; color:var(--primary);"></i> DATA SELURUH ANGGOTA</p>
+                    
+                    <!-- FITUR 1: PENCARIAN ANGGOTA -->
+                    <div style="margin-bottom: 20px;">
+                        <input type="text" id="search-siswa" class="auth-input" placeholder="🔍 Cari nama anggota di sini..." onkeyup="filterSiswa()" style="text-align: left; padding: 14px; margin-bottom: 0; font-size: 12px;">
+                    </div>
+                    
                     <div id="grid-all"></div>
+                </div>
+            </div>
+
+            <!-- HALAMAN LEADERBOARD ADMIN -->
+            <div id="p-peringkat" class="page">
+                <div class="card-box" style="padding: 20px;">
+                    <p style="font-size: 13px; font-weight: 900; color: #d97706; margin-bottom: 5px; display: flex; align-items:center; justify-content:center; gap:8px;">
+                        <i data-lucide="trophy" style="width:20px;"></i> PAPAN PERINGKAT KEDISIPLINAN
+                    </p>
+                    <p style="text-align: center; font-size: 11px; color: var(--text-muted); margin-bottom: 25px;">Top anggota berdasarkan akumulasi poin kedisiplinan tertinggi.</p>
+                    
+                    <div id="list-peringkat-admin">
+                        <!-- Konten Leaderboard Digenerate JS -->
+                    </div>
                 </div>
             </div>
 
@@ -400,9 +434,28 @@
             </div>
 
         </main>
+
+        <!-- FITUR 2: MODAL EDIT DATA ANGGOTA -->
+        <div id="edit-modal" style="position: fixed; inset: 0; z-index: 9999; display: none; align-items: center; justify-content: center; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(5px);">
+            <div class="dialog-card">
+                <div style="width: 50px; height: 50px; background: var(--primary-light); color: var(--primary); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;"><i data-lucide="user-cog" style="width: 25px; height: 25px;"></i></div>
+                <h3 style="font-weight:900; margin-bottom:20px; color: var(--text-main);">EDIT DATA ANGGOTA</h3>
+                <input type="hidden" id="e-rowId">
+                <input type="text" id="e-nama" class="auth-input" placeholder="NAMA LENGKAP" style="text-transform: uppercase;">
+                <input type="text" id="e-role" class="auth-input" placeholder="ROLE (Misal: ANGGOTA)">
+                <input type="text" id="e-angkatan" class="auth-input" placeholder="ANGKATAN (Misal: 22)">
+                <input type="text" id="e-phone" class="auth-input" placeholder="NO WA (08...)">
+                <div style="display:flex; gap:10px;">
+                    <button onclick="document.getElementById('edit-modal').style.display='none'" class="auth-btn" style="flex:1; background:var(--bg); color:var(--text-muted); border:1px solid var(--border); box-shadow:none;">BATAL</button>
+                    <button onclick="simpanEditSiswa()" class="auth-btn" style="flex:1; background:var(--primary);">SIMPAN</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
+        // GANTI LINK INI DENGAN LINK WEB APP LU YANG BARU
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxieMyuN0q4QbCHIQAYj4gMKj1U-AlF2NM1Elbvs11MITj5Wrgdafblkd-YkqDFFeUJ/exec"; 
 
         let globalLogs = [];
@@ -415,15 +468,9 @@
                         method: 'POST',
                         body: new URLSearchParams(params) 
                     });
-                    
                     if (!response.ok) throw new Error("Koneksi Error");
-                    
-                    const data = await response.json();
-                    resolve(data);
-                } catch (error) {
-                    console.error("Gagal Request:", error);
-                    reject(new Error("Koneksi HQ Terputus!"));
-                }
+                    resolve(await response.json());
+                } catch (error) { reject(new Error("Koneksi HQ Terputus!")); }
             });
         }
 
@@ -540,6 +587,39 @@
             }
         }
 
+        // === FITUR AUTO WA ALPA DENGAN POSISI YANG BENAR ===
+        async function triggerWaAlpa() {
+            const ok = await showSysDialog({
+                title: "KONFIRMASI AUTO WA",
+                msg: "Sistem akan melacak anggota yang belum absen hari ini dan otomatis mengirimkan pesan teguran ke nomor WhatsApp mereka via server. Lanjutkan?",
+                type: "warning",
+                color: "#d97706",
+                confirmText: "YA, KIRIM",
+                showCancel: true
+            });
+            
+            if(ok) {
+                eksekusiWaAlpa();
+            }
+        }
+
+        async function eksekusiWaAlpa() {
+            document.getElementById('loading-overlay').style.display = 'flex';
+            const tgl = new Date().toLocaleDateString('id-ID'); // Format lokal DD/MM/YYYY
+            try {
+                const res = await requestData(`action=sendWaAlpa&date=${tgl}`);
+                document.getElementById('loading-overlay').style.display = 'none';
+                if(res.status === 'success') {
+                    showSysDialog({title: "SUKSES TERKIRIM", msg: res.msg, type: "success", color: "var(--success)"});
+                } else {
+                    showSysDialog({title: "GAGAL", msg: res.msg, type: "error", color: "var(--danger)"});
+                }
+            } catch(e) {
+                document.getElementById('loading-overlay').style.display = 'none';
+                showSysDialog({title: "KONEKSI PUTUS", msg: "Gagal memproses instruksi pengiriman WA.", type: "error", color: "var(--danger)"});
+            }
+        }
+
         async function hapusSemuaLog() {
             if(!globalLogs || globalLogs.length === 0) {
                 return showSysDialog({title: "INFO", msg: "Data laporan absen sudah kosong.", type: "info", color: "var(--primary)"});
@@ -561,7 +641,7 @@
                 prompt: true,
                 placeholder: "Ketik HAPUS di sini...",
                 showCancel: true,
-                confirmText: "KONFIRMASI",
+                confirmText: "EKSEKUSI",
                 color: "var(--danger)"
             });
 
@@ -596,7 +676,6 @@
                 filteredLogs = globalLogs.filter(l => {
                     if(!l.tanggal) return false;
                     const dStr = String(l.tanggal);
-                    // Support format YYYY-MM-DD dan DD/MM/YYYY dari spreadsheet
                     return dStr.startsWith(`${y}-${m}`) || dStr.includes(`/${m}/${y}`) || dStr.includes(`-${m}-${y}`);
                 });
             }
@@ -606,8 +685,8 @@
                 if(String(j).includes('T')) { const d = new Date(j); j = d.getHours().toString().padStart(2,'0') + ":" + d.getMinutes().toString().padStart(2,'0'); }
                 let tglRapi = l.tanggal ? String(l.tanggal).substring(0,10) : '-';
                 
-                let col = (l.status === 'TEPAT WAKTU' || l.status === 'HADIR') ? 'var(--success)' : (l.status === 'IZIN' ? 'var(--primary)' : 'var(--danger)');
-                let bgCol = (l.status === 'TEPAT WAKTU' || l.status === 'HADIR') ? '#ecfdf5' : (l.status === 'IZIN' ? 'var(--primary-light)' : '#fef2f2');
+                let col = (l.status === 'TEPAT WAKTU' || l.status === 'HADIR' || l.status === 'REWARD') ? 'var(--success)' : (l.status === 'IZIN' ? 'var(--primary)' : 'var(--danger)');
+                let bgCol = (l.status === 'TEPAT WAKTU' || l.status === 'HADIR' || l.status === 'REWARD') ? '#ecfdf5' : (l.status === 'IZIN' ? 'var(--primary-light)' : '#fef2f2');
                 
                 let ketText = l.keterangan ? l.keterangan : (l.status === 'IZIN' ? 'Tanpa Alasan' : 'Scan QR');
                 
@@ -626,7 +705,10 @@
                             <small style="color: var(--text-muted); font-weight: 800; font-size: 10px; display:flex; align-items:center; gap:4px;"><i data-lucide="clock" style="width:12px;"></i> ${tglRapi} | ${j}</small>
                             <small style="color: var(--text-muted); font-weight: 600; font-size: 10px; font-style: italic;">Ket: ${ketText}</small>
                         </div>
-                        <span style="font-size:9px; font-weight:900; color:${col}; background:${bgCol}; padding:6px 10px; border-radius:10px;">${l.status}</span>
+                        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+                            <span style="font-size:9px; font-weight:900; color:${col}; background:${bgCol}; padding:4px 8px; border-radius:8px;">${l.status}</span>
+                            ${l.poin && l.poin !== "0" ? `<span style="font-size:9px; font-weight:900; color:#d97706; display:flex; align-items:center;"><i data-lucide="star" style="width:10px; margin-right:2px;"></i> ${l.poin} PTS</span>` : ''}
+                        </div>
                     </div>
                 </div>`;
             }).join('') || '<p style="text-align:center; color:var(--text-muted); font-size:12px; font-weight:700; padding: 20px;">Belum ada data absen.</p>';
@@ -674,20 +756,6 @@
             XLSX.utils.book_append_sheet(wb, ws, "Laporan Absensi");
             const dateStr = new Date().toLocaleDateString('id-ID').replace(/\//g, '-');
             XLSX.writeFile(wb, `Rekap_Absen_Prasaka_${bulanText}_${dateStr}.xlsx`);
-        }
-
-        function japriWA(nama, phone) {
-            if (!phone || phone === '-' || phone.trim() === '') {
-                return showSysDialog({title: "GAGAL", msg: "Nomor WhatsApp tidak tersedia untuk anggota ini.", type: "error", color: "var(--danger)"});
-            }
-            
-            let waNum = phone.replace(/\D/g, ''); // bersihin karakter selain angka
-            if (waNum.startsWith('0')) {
-                waNum = '62' + waNum.substring(1); // ubah awalan 0 jadi 62
-            }
-            
-            const text = encodeURIComponent(`Halo ${nama}, kamu belum absen latihan hari ini. Tolong segera konfirmasi kehadiran atau ajukan form izin di portal ya. Terima kasih!`);
-            window.open(`https://wa.me/${waNum}?text=${text}`, '_blank');
         }
 
         function generateQR() {
@@ -741,12 +809,13 @@
             logHariIni.forEach(l => { if(!uniqueLogs[l.nama]) uniqueLogs[l.nama] = l.status; });
             let countHadir = 0, countIzin = 0, countTelat = 0;
             Object.values(uniqueLogs).forEach(s => {
-                if(s === "TEPAT WAKTU" || s === "HADIR") countHadir++;
-                else if(s === "IZIN") countIzin++;
-                else if(s === "TERLAMBAT") countTelat++;
+                const stat = (s || "").trim().toUpperCase();
+                if(stat === "TEPAT WAKTU" || stat === "HADIR") countHadir++;
+                else if(stat === "IZIN") countIzin++;
+                else if(stat === "TERLAMBAT") countTelat++;
             });
 
-            const totalAktif = data.siswa.filter(s => s.status === 'ACTIVE').length;
+            const totalAktif = data.siswa.filter(s => (s.status || "").trim().toUpperCase() === 'ACTIVE').length;
             document.getElementById('st-hadir').innerText = countHadir;
             document.getElementById('st-izin').innerText = countIzin;
             document.getElementById('st-telat').innerText = countTelat;
@@ -779,8 +848,8 @@
                 let j = l.jam;
                 if(String(j).includes('T')) { const d = new Date(j); j = d.getHours().toString().padStart(2,'0')+":"+d.getMinutes().toString().padStart(2,'0'); }
                 
-                let col = (l.status === 'TEPAT WAKTU' || l.status === 'HADIR') ? 'var(--success)' : (l.status === 'IZIN' ? 'var(--primary)' : 'var(--danger)');
-                let bgCol = (l.status === 'TEPAT WAKTU' || l.status === 'HADIR') ? '#ecfdf5' : (l.status === 'IZIN' ? 'var(--primary-light)' : '#fef2f2');
+                let col = (l.status === 'TEPAT WAKTU' || l.status === 'HADIR' || l.status === 'REWARD') ? 'var(--success)' : (l.status === 'IZIN' ? 'var(--primary)' : 'var(--danger)');
+                let bgCol = (l.status === 'TEPAT WAKTU' || l.status === 'HADIR' || l.status === 'REWARD') ? '#ecfdf5' : (l.status === 'IZIN' ? 'var(--primary-light)' : '#fef2f2');
                 
                 return `
                 <div style="display:flex; justify-content:space-between; align-items:center; padding: 14px; background:var(--bg); border:1px solid var(--border); border-radius:16px; margin-bottom:10px; border-left: 4px solid ${col};">
@@ -807,31 +876,239 @@
                 generateQR();
                 updateDashboardUI(data); 
 
-                document.getElementById('grid-all').innerHTML = data.siswa.map(s=>`
-                    <div class="data-row">
-                        <div style="flex:1;">
+                // KALKULASI POIN KEDISIPLINAN (DIPERBAIKI)
+                const poinMap = {};
+                data.logs.forEach(l => {
+                    const n = (l.nama || "").toUpperCase().trim();
+                    if(!poinMap[n]) poinMap[n] = 0;
+                    
+                    let pVal = parseInt(String(l.poin).replace(/[^0-9-]/g, ''));
+                    if(!isNaN(pVal)) {
+                        poinMap[n] += pVal;
+                    }
+                });
+
+                // Render Papan Peringkat
+                renderPeringkatAdmin(data.siswa, poinMap);
+
+                document.getElementById('grid-all').innerHTML = data.siswa.map(s=>{
+                    const stat = (s.status || "").trim().toUpperCase();
+                    const isAktif = stat === 'ACTIVE';
+                    const displayStat = (stat === '' || stat === '-') ? 'PENDING' : stat;
+                    
+                    // PERBAIKAN: Hitung POIN PERMANEN + POIN LOG
+                    const nSiswa = (s.nama || "").toUpperCase().trim();
+                    let poinPermanen = parseInt(s.poin);
+                    if(isNaN(poinPermanen)) poinPermanen = 0;
+                    const totalPoin = poinPermanen + (poinMap[nSiswa] || 0);
+
+                    return `
+                    <div class="data-row siswa-row-item" data-nama="${s.nama}" style="flex-wrap: wrap; gap: 15px; align-items: flex-start;">
+                        <div style="flex:1; min-width: 150px;">
                             <b style="font-size: 13px; color: var(--text-main); font-weight:900;">${s.nama}</b><br>
-                            <small style="color: var(--primary); font-weight: 800; font-size:10px;">${s.role} | ANGKATAN ${s.angkatan || '-'}</small>
-                            <div style="display: flex; gap: 10px; align-items: center; margin-top: 6px;">
-                                <small style="color: var(--text-muted); font-weight: 700; font-size:10px;"><i data-lucide="phone" style="width:10px; display:inline-block;"></i> ${s.phone || '-'}</small>
-                                <span class="status-tag ${s.status === 'ACTIVE' ? 'status-active' : 'status-pending'}" style="font-size:8px; padding:3px 6px;">${s.status}</span>
+                            <small style="color: var(--text-muted); font-weight: 800; font-size:10px;">${s.role} | ANGKATAN ${s.angkatan || '-'}</small>
+                            <div style="display: flex; gap: 8px; align-items: center; margin-top: 8px;">
+                                <span class="status-tag ${isAktif ? 'status-active' : 'status-pending'}" style="font-size:8px; padding:3px 6px;">${displayStat}</span>
+                                <span class="status-tag" style="background:#fef3c7; color:#d97706; border:1px solid #fde68a; font-size:8px; padding:3px 6px; display:flex; align-items:center;">
+                                    <i data-lucide="star" style="width:8px; margin-right:3px;"></i> ${totalPoin} PTS
+                                </span>
+                            </div>
+                            <div style="margin-top: 6px;">
+                                <small style="color: var(--text-muted); font-weight: 700; font-size:10px; display:flex; align-items:center;"><i data-lucide="phone" style="width:10px; margin-right:4px;"></i> ${s.phone || '-'}</small>
                             </div>
                         </div>
-                        <div style="display:flex; gap:8px;">
-                            <button onclick="japriWA('${s.nama}', '${s.phone}')" style="color:white; background:var(--success); border:none; border-radius:12px; cursor:pointer; padding:10px; transition:0.2s;" title="Tegur via WhatsApp"><i data-lucide="message-circle" style="width:16px;"></i></button>
-                            <button onclick="hapusData('Siswa',${s.rowId})" style="color:var(--danger); background:#fef2f2; border:1px solid #fecaca; border-radius:12px; cursor:pointer; padding:10px; transition:0.2s;" title="Hapus Akun"><i data-lucide="trash-2" style="width:16px;"></i></button>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center; justify-content:flex-end;">
+                            <!-- TOMBOL BERI POIN (KUNING BINTANG) -->
+                            <button onclick="beriPoin('${s.nama}')" style="color:#d97706; background:#fef3c7; border:1px solid #fde68a; border-radius:10px; cursor:pointer; padding:8px; transition:0.2s;" title="Beri Poin Kedisiplinan">
+                                <i data-lucide="star" style="width:14px;"></i>
+                            </button>
+                            <!-- TOMBOL EDIT DATA (ABU-ABU) -->
+                            <button onclick="editSiswa(${s.rowId}, '${s.nama}', '${s.role}', '${s.phone}', '${s.angkatan}')" style="color:var(--text-muted); background:var(--bg); border:1px solid var(--border); border-radius:10px; cursor:pointer; padding:8px; transition:0.2s;" title="Edit Data Anggota">
+                                <i data-lucide="edit" style="width:14px;"></i>
+                            </button>
+                            <!-- TOMBOL MENGINGATKAN LATIHAN (BIRU) -->
+                            <button onclick="japriWAReminder('${s.nama}', '${s.phone}')" style="color:var(--primary); background:var(--primary-light); border:none; border-radius:10px; cursor:pointer; padding:8px; transition:0.2s;" title="Ingatkan Latihan">
+                                <i data-lucide="bell" style="width:14px;"></i>
+                            </button>
+                            <!-- TOMBOL MENEGUR ALPA (KUNING ALERT) -->
+                            <button onclick="japriWATeguran('${s.nama}', '${s.phone}')" style="color:var(--warning); background:#fef9c3; border:none; border-radius:10px; cursor:pointer; padding:8px; transition:0.2s;" title="Tegur Alpa">
+                                <i data-lucide="alert-triangle" style="width:14px;"></i>
+                            </button>
+                            <!-- TOMBOL HAPUS AKUN (MERAH) -->
+                            <button onclick="hapusData('Siswa',${s.rowId})" style="color:var(--danger); background:#fef2f2; border:none; border-radius:10px; cursor:pointer; padding:8px; transition:0.2s;" title="Hapus Akun">
+                                <i data-lucide="trash-2" style="width:14px;"></i>
+                            </button>
                         </div>
-                    </div>
-                `).join('');
+                    </div>`
+                }).join('');
 
                 renderLaporan();
                 
-                document.getElementById('list-pending').innerHTML = data.siswa.filter(s=>s.status==='PENDING').map(s=>`
+                const pendingSiswa = data.siswa.filter(s => {
+                    const stat = (s.status || "").trim().toUpperCase();
+                    return stat === 'PENDING' || stat === '' || stat === '-';
+                });
+
+                document.getElementById('list-pending').innerHTML = pendingSiswa.map(s=>`
                     <div class="data-row">
                         <span style="font-size:13px; font-weight:800; color:var(--text-main);">${s.nama}</span>
                         <button onclick="acc(${s.rowId})" style="background:var(--success); color:white; padding:10px 16px; border:none; border-radius:12px; font-weight:900; font-size:11px; cursor:pointer; box-shadow:0 4px 10px rgba(16, 185, 129, 0.2);">ACC</button>
                     </div>`).join('') || '<p style="text-align:center; color:var(--text-muted); font-size:11px; font-weight:700;">Tidak ada anggota menunggu ACC.</p>';
                 lucide.createIcons();
+            }
+        }
+
+        // === FUNGSI RENDER PAPAN PERINGKAT ===
+        function renderPeringkatAdmin(siswaList, poinMap) {
+            let leaderboard = siswaList.filter(s => s.status === 'ACTIVE').map(s => {
+                // PERBAIKAN: Hitung POIN PERMANEN + POIN LOG
+                const nSiswa = (s.nama || "").toUpperCase().trim();
+                let poinPermanen = parseInt(s.poin);
+                if(isNaN(poinPermanen)) poinPermanen = 0;
+
+                return {
+                    nama: s.nama,
+                    role: s.role,
+                    angkatan: s.angkatan,
+                    poin: poinPermanen + (poinMap[nSiswa] || 0)
+                };
+            });
+
+            // Urutkan Poin Terbesar ke Terkecil
+            leaderboard.sort((a, b) => b.poin - a.poin);
+
+            const container = document.getElementById('list-peringkat-admin');
+            if(leaderboard.length === 0) {
+                container.innerHTML = '<p style="text-align:center; font-size:11px; color:var(--text-muted);">Belum ada data anggota aktif.</p>';
+                return;
+            }
+
+            container.innerHTML = leaderboard.map((s, idx) => {
+                let badge = ''; let bg = 'var(--surface)'; let border = 'var(--border)'; let crown = '';
+                
+                if(idx === 0) { badge = '🥇'; bg = '#fef9c3'; border = '#fde047'; crown = '<i data-lucide="crown" style="width:14px; color:#d97706; margin-left:5px;"></i>'; }
+                else if(idx === 1) { badge = '🥈'; bg = '#f8fafc'; border = '#cbd5e1'; }
+                else if(idx === 2) { badge = '🥉'; bg = '#fff7ed'; border = '#fdba74'; }
+                else { badge = `<span style="font-weight:900; color:var(--text-muted); font-size:14px; width:25px; display:inline-block; text-align:center;">#${idx+1}</span>`; }
+
+                return `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:${bg}; border:1px solid ${border}; border-radius:16px; margin-bottom:12px; box-shadow: var(--card-shadow);">
+                    <div style="display:flex; align-items:center; gap:15px;">
+                        <div style="font-size:24px;">${badge}</div>
+                        <div>
+                            <p style="font-size:13px; font-weight:900; color:var(--text-main); margin-bottom:4px; display:flex; align-items:center;">${s.nama} ${crown}</p>
+                            <p style="font-size:10px; color:var(--text-muted); font-weight:700; text-transform:uppercase;">${s.role} | ANGKATAN ${s.angkatan || '-'}</p>
+                        </div>
+                    </div>
+                    <div style="background:var(--surface); border:1px solid ${border}; padding:8px 14px; border-radius:12px; display:flex; align-items:center; gap:6px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
+                        <i data-lucide="star" style="width:14px; color:#d97706;"></i>
+                        <span style="font-size:14px; font-weight:900; color:#d97706;">${s.poin} PTS</span>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        // === FITUR 1: FUNGSI PENCARIAN ANGGOTA ===
+        function filterSiswa() {
+            const input = document.getElementById('search-siswa').value.toLowerCase();
+            const rows = document.querySelectorAll('.siswa-row-item');
+            rows.forEach(row => {
+                const nama = row.getAttribute('data-nama').toLowerCase();
+                if (nama.includes(input)) {
+                    row.style.display = 'flex';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // === FITUR 2: FUNGSI EDIT DATA ANGGOTA ===
+        function editSiswa(rowId, nama, role, phone, angkatan) {
+            document.getElementById('e-rowId').value = rowId;
+            document.getElementById('e-nama').value = nama;
+            document.getElementById('e-role').value = role;
+            document.getElementById('e-angkatan').value = angkatan !== '-' ? angkatan : '';
+            document.getElementById('e-phone').value = phone !== '-' ? phone : '';
+            document.getElementById('edit-modal').style.display = 'flex';
+        }
+
+        async function simpanEditSiswa() {
+            const rowId = document.getElementById('e-rowId').value;
+            const nama = document.getElementById('e-nama').value.trim().toUpperCase();
+            const role = document.getElementById('e-role').value.trim();
+            const angkatan = document.getElementById('e-angkatan').value.trim();
+            const phone = document.getElementById('e-phone').value.trim();
+
+            if(!nama) return showSysDialog({title:"PERHATIAN", msg:"Nama tidak boleh kosong!", type:"error", color:"var(--warning)"});
+            
+            document.getElementById('edit-modal').style.display = 'none';
+            document.getElementById('loading-overlay').style.display = 'flex';
+
+            try {
+                const params = `action=editSiswa&rowId=${rowId}&nama=${encodeURIComponent(nama)}&role=${encodeURIComponent(role)}&angkatan=${encodeURIComponent(angkatan)}&phone=${encodeURIComponent(phone)}`;
+                const res = await requestData(params);
+                
+                document.getElementById('loading-overlay').style.display = 'none';
+                
+                if(res.status === 'success') {
+                    await showSysDialog({title:"SUKSES", msg:"Data anggota berhasil diperbarui!", type:"success", color:"var(--success)"});
+                    fetchData();
+                } else {
+                    showSysDialog({title:"GAGAL", msg:res.msg, type:"error", color:"var(--danger)"});
+                }
+            } catch(e) {
+                document.getElementById('loading-overlay').style.display = 'none';
+                showSysDialog({title:"ERROR", msg:"Gagal mengirim data pembaruan.", type:"error", color:"var(--danger)"});
+            }
+        }
+
+        // === FITUR 3: SISTEM POIN KEDISIPLINAN ===
+        async function beriPoin(nama) {
+            const amt = await showSysDialog({
+                title: "BERI POIN KEDISIPLINAN",
+                msg: `Masukkan jumlah poin untuk ${nama}\n(Cth: 10 untuk reward, -5 untuk pelanggaran):`,
+                prompt: true,
+                placeholder: "Contoh: 10 atau -5",
+                showCancel: true,
+                confirmText: "LANJUTKAN",
+                color: "#d97706"
+            });
+            if(amt === false) return; 
+            
+            const poinVal = parseInt(amt);
+            if(isNaN(poinVal)) return showSysDialog({title:"GAGAL", msg:"Poin harus berupa angka!", type:"error", color:"var(--danger)"});
+            
+            const ket = await showSysDialog({
+                title: "KETERANGAN POIN",
+                msg: `Alasan pemberian/pengurangan ${poinVal} poin:`,
+                prompt: true,
+                placeholder: "Cth: Rajin / Terlambat",
+                showCancel: true,
+                confirmText: "SIMPAN POIN",
+                color: "#d97706"
+            });
+            if(ket === false) return;
+
+            document.getElementById('loading-overlay').style.display = 'flex';
+            const tgl = new Date().toLocaleDateString('id-ID');
+            const jam = new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
+            const status = poinVal > 0 ? 'REWARD' : 'PUNISHMENT';
+            
+            const params = `action=attendance&nama=${encodeURIComponent(nama)}&status=${status}&ket=${encodeURIComponent(ket||'Penyesuaian Poin')}&poin=${poinVal}&date=${tgl}&time=${jam}`;
+            
+            try {
+                const res = await requestData(params);
+                document.getElementById('loading-overlay').style.display = 'none';
+                if(res.status === 'success') {
+                    await showSysDialog({title:"BERHASIL", msg:"Poin kedisiplinan berhasil ditambahkan ke riwayat!", type:"success", color:"var(--success)"});
+                    fetchData();
+                } else {
+                    showSysDialog({title:"GAGAL", msg:res.msg, type:"error", color:"var(--danger)"});
+                }
+            } catch(e) {
+                document.getElementById('loading-overlay').style.display = 'none';
+                showSysDialog({title:"ERROR", msg:"Gagal mengirim data.", type:"error", color:"var(--danger)"});
             }
         }
 
@@ -945,13 +1222,27 @@
             const ann = document.getElementById('s-ann').value;
             const marq = document.getElementById('s-marquee').value;
             const tim = document.getElementById('s-tim').value;
-            await saveConfigData(ann, marq, tim, "", "", "Lokasi radar berhasil dikosongkan.");
+            await saveConfigData(ann, marq, tim, "", "", "Koordinat lokasi berhasil dihapus.");
         }
 
         function toggleTheme() {
             const isDark = document.body.classList.toggle('dark-theme');
             localStorage.setItem('prasaka_admin_theme', isDark ? 'dark' : 'light');
             updateThemeUI(isDark);
+        }
+
+        function japriWAReminder(nama, phone) {
+            if(!phone || phone === '-') return showSysDialog({title:"GAGAL", msg:"Nomor HP tidak valid.", type:"error", color:"var(--danger)"});
+            let no = String(phone).replace(/^0/, '62');
+            let text = `Halo ${nama}, jangan lupa hari ini ada jadwal latihan PRASAKA ya. Segera datang ke lokasi dan pastikan kamu sudah absen melalui sistem. Ditunggu kehadirannya!`;
+            window.open(`https://wa.me/${no}?text=${encodeURIComponent(text)}`, '_blank');
+        }
+
+        function japriWATeguran(nama, phone) {
+            if(!phone || phone === '-') return showSysDialog({title:"GAGAL", msg:"Nomor HP tidak valid.", type:"error", color:"var(--danger)"});
+            let no = String(phone).replace(/^0/, '62');
+            let text = `Halo ${nama}, dari data absen PRASAKA kamu tercatat tidak hadir latihan tanpa keterangan (Alpa). Tolong segera konfirmasi alasannya ya.`;
+            window.open(`https://wa.me/${no}?text=${encodeURIComponent(text)}`, '_blank');
         }
 
         function updateThemeUI(isDark) {
@@ -970,7 +1261,6 @@
         window.onload = async () => { 
             lucide.createIcons();
             
-            // Cek Tema Tersimpan
             const savedTheme = localStorage.getItem('prasaka_admin_theme');
             if(savedTheme === 'dark') {
                 document.body.classList.add('dark-theme');
@@ -979,7 +1269,6 @@
 
             fetchWelcomeStats(); 
             
-            // CEK KEAMANAN SESI (VALIDASI ULANG KE EXCEL)
             const s = localStorage.getItem('admin_auth'); 
             if(s) { 
                 const authData = JSON.parse(s);
